@@ -175,7 +175,7 @@
   .netwrap canvas{width:100%; height:100%; display:block}
 
   .cam-dock{
-    position:absolute; bottom:12px; left:50%; transform:translateX(-50%); z-index:3;
+    position:absolute; bottom:12px; left:12px; z-index:5;
     display:flex; gap:3px; padding:4px; border-radius:11px;
     background:rgba(13,18,27,.78); backdrop-filter:blur(9px); -webkit-backdrop-filter:blur(9px);
     border:1px solid var(--border);
@@ -489,6 +489,8 @@
   .viewers{font-family:var(--mono); font-size:9px; letter-spacing:.02em; color:#5d6b7d;
     margin:-3px 1px 6px; min-height:11px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap}
   .lb-row{display:flex; align-items:center; gap:8px; padding:4px 3px; border-bottom:1px solid rgba(31,42,56,.4)}
+  .lb-note{font-size:11px; line-height:1.5; color:var(--muted); padding:6px 2px}
+  .lb-note b{color:var(--text)}
   .lb-row:last-child{border-bottom:none}
   .lb-rank{font-family:var(--mono); font-size:10px; color:var(--muted); width:24px; text-align:right; flex:none}
   .lb-name{font-family:var(--body); font-size:12px; color:var(--text); flex:1; overflow:hidden; text-overflow:ellipsis; white-space:nowrap}
@@ -623,7 +625,7 @@
       </div>
       <div class="intel-odds intel-upgrades">
         <div class="io-title">UPGRADES — one-time unlocks</div>
-        <p>Find these in the <b>UPGRADES</b> bar at the bottom-left, under the arena. Each is bought <b>once</b> with tokens, then toggled on/off for free. They're cosmetic or informational and <b>never change who wins</b>. On a touch screen, tap an upgrade once to see what it does and its price, then tap again to confirm.</p>
+        <p>Find these in the <b>UPGRADES</b> bar at the bottom-right, under the arena. Each is bought <b>once</b> with tokens and is then <b>permanently active</b> — there's no toggle to manage and it stays unlocked for good. They're cosmetic or informational and <b>never change who wins</b>. On a touch screen, tap an upgrade once to see what it does and its price, then tap again to confirm.</p>
         <div class="io-upgrades" id="io-upgrades"></div>
       </div>
       <button class="modal-cta" id="intel-go">GOT IT — START BETTING</button>
@@ -775,7 +777,7 @@
     </div>
 
     <div class="perk-dock" id="perk-dock">
-      <span class="perk-lbl">UPGRADES <span class="perk-sub">one-time · tap for info</span></span>
+      <span class="perk-lbl">UPGRADES <span class="perk-sub">one-time · permanent</span></span>
       <button class="perk-btn" id="perk-analytics">ANALYTICS <span class="perk-cost">150</span></button>
       <button class="perk-btn" id="perk-predict">PREDICTIONS <span class="perk-cost">250</span></button>
       <button class="perk-btn" id="perk-insure">INSURANCE <span class="perk-cost">350</span></button>
@@ -841,7 +843,7 @@
       <div class="feed" id="feed"></div>
     </div>
     <div class="panel">
-      <div class="panel-head"><span class="panel-title">STANDINGS</span><input id="name-input" class="name-input" maxlength="16" placeholder="set name…" spellcheck="false" autocomplete="off" /></div>
+      <div class="panel-head"><span class="panel-title" id="board-title">STANDINGS</span><input id="name-input" class="name-input" maxlength="16" placeholder="set name…" spellcheck="false" autocomplete="off" /></div>
       <div class="board" id="board"></div>
     </div>
     <div class="panel chat-panel">
@@ -1423,8 +1425,8 @@ const MODES = [
   { key: 'ATTRITION', name: 'ATTRITION',       tag: 'Measured · grinding war',     crit: 0.10, hp: 1.30, speed: 0.88, fire: 0.82, dmg: 1.08, acc: 0.006, prefDist: 1.02, dash: 0.86, shield: false, baseA: 0.61 },
   { key: 'OVERDRIVE', name: 'OVERDRIVE',       tag: 'Hyper fire-rate · fast bolts', crit: 0.12, hp: 0.92, speed: 1.18, fire: 1.55, dmg: 0.72, acc: -0.02, prefDist: 0.95, dash: 1.2, mag: 1.5, proj: 1.25, shield: false, baseA: 0.42 },
   { key: 'GUERRILLA', name: 'GUERRILLA',       tag: 'Scarce ammo · hit & run',     crit: 0.14, hp: 0.95, speed: 1.16, fire: 1.05, dmg: 1.12, acc: 0.0, prefDist: 1.0, dash: 1.25, mag: 0.5, reload: 1.25, shield: false, baseA: 0.41 },
-  { key: 'CONTROL',   name: 'CONTROL POINT',   tag: 'Hold the zone · respawns', obj: 'control', respawn: true, respawnDelay: 1.8, crit: 0.10, hp: 1.12, speed: 1.04, fire: 0.95, dmg: 0.95, acc: 0.0, prefDist: 0.7, dash: 1.0, shield: false, baseA: 0.59 },
-  { key: 'TDM',       name: 'TEAM DEATHMATCH', tag: 'Respawns · first to 2 kills', respawn: true, respawnDelay: 1.7, scoreTarget: 2, crit: 0.12, hp: 1.0, speed: 1.06, fire: 1.0, dmg: 1.0, acc: 0.0, prefDist: 0.95, dash: 1.1, shield: false, baseA: 0.42 },
+  { key: 'CONTROL',   name: 'CONTROL POINT',   tag: 'Hold the zone · respawns', obj: 'control', respawn: true, respawnDelay: 1.8, tl: 24, crit: 0.10, hp: 1.12, speed: 1.04, fire: 0.95, dmg: 0.95, acc: 0.0, prefDist: 0.7, dash: 1.0, shield: false, baseA: 0.57 },
+  { key: 'TDM',       name: 'TEAM DEATHMATCH', tag: 'Respawns · first to 2 kills', respawn: true, respawnDelay: 1.7, scoreTarget: 2, tl: 24, crit: 0.12, hp: 1.0, speed: 1.06, fire: 1.0, dmg: 1.0, acc: 0.0, prefDist: 0.95, dash: 1.1, shield: false, baseA: 0.55 },
 ];
 
 function applyMode(base, m) {
@@ -1574,6 +1576,9 @@ class Match {
     this.respawns = !!this.mode.respawn;     // a death queues a respawn instead of ending the match
     this.respawnDelay = this.mode.respawnDelay || 2.0;
     this.scoreTarget = this.mode.scoreTarget || 0;   // first team to N eliminations wins (TDM); 0 = no score win
+    // per-mode sim length: objective/respawn modes (CONTROL, TDM) need longer to reach their win
+    // condition, so they get to play out instead of being decided by a premature time cap.
+    this.timeLimit = (typeof this.mode.tl === 'number' ? this.mode.tl : MATCH_TIME_LIMIT);
     this.uav = false;                        // sudden-death omniscience (set by the referee in deep stalls)
     this.uavAnnounced = false;
     this.t = 0;
@@ -1644,7 +1649,7 @@ class Match {
   // CLOSING intensity 0..1 — the anti-stalemate referee. Ramps with the match clock and with
   // time since the last hit landed, so passive standoffs and "lost contact" loops always resolve.
   closing() {
-    const tf = clamp((this.t - 0.5 * MATCH_TIME_LIMIT) / (0.42 * MATCH_TIME_LIMIT), 0, 1);
+    const tf = clamp((this.t - 0.5 * this.timeLimit) / (0.42 * this.timeLimit), 0, 1);
     const lastBlood = Math.max(this.a.lastHitT, this.b.lastHitT, 0);
     const sf = clamp((this.t - lastBlood - 3.2) / 3.0, 0, 1);
     return tf > sf ? tf : sf;
@@ -2041,7 +2046,7 @@ class Match {
     // ---- UAV sudden-death: in a deep stall (or the final seconds with no contact) both mechs
     //      get a recon ping revealing the enemy's true position, so the standoff ends in a rush ----
     const unseen = this.t - this.lastLosT;
-    const lateGame = this.t > MATCH_TIME_LIMIT - 4.5;
+    const lateGame = this.t > this.timeLimit - 4.5;
     this.uav = (unseen > 4.0) || (lateGame && unseen > 1.5);
     if (this.uav) {
       for (const ag of this.agents) {
@@ -2064,7 +2069,7 @@ class Match {
       // deathmatch modes end on elimination; respawn modes never do (a death queues a respawn)
       this.over = true;
       this.winner = (!aliveA && !aliveB) ? 'DRAW' : (!aliveA ? 'NEMESIS' : 'AXIOM');
-    } else if (this.t >= MATCH_TIME_LIMIT) {
+    } else if (this.t >= this.timeLimit) {
       this.over = true;
       if (this.obj === 'control') {
         this.winner = this.capA > this.capB ? 'AXIOM' : (this.capB > this.capA ? 'NEMESIS' : (this.rng() < 0.5 ? 'AXIOM' : 'NEMESIS'));
@@ -2118,10 +2123,15 @@ if (typeof module !== 'undefined' && module.exports) {
      CONSTANTS
      ======================================================================== */
   const DT = 1 / 60;                 // sim timestep (matches the tested harness)
-  const CYCLE_MS = 32000;            // full betting cycle (trimmed so matches come quicker)
-  const BET_MS = 9000;               // bets open
-  const FIGHT_MS = 16000;            // live combat (match resolves inside this; replay fills any slack)
-  const RESULT_MS = 7000;            // replay tail + settlement (sums to 32000)
+  const BET_MS = 9000;               // bets open (fixed for every match)
+  const RESULT_MS = 7000;            // replay tail + settlement (fixed for every match)
+  // FIGHT (live-combat) window is PER MODE. Most modes resolve in well under 11s, but the
+  // objective/respawn modes need ~24s to reach their win condition, so they get a longer live
+  // window to actually play out instead of being cut off. Each window must be >= that mode's sim
+  // time limit (core MATCH_TIME_LIMIT=15, or mode.tl) plus a short finish/replay buffer.
+  const FIGHT_MS_DEFAULT = 16000;
+  const FIGHT_MS_BY_KEY = { CONTROL: 26000, TDM: 26000 };   // CONTROL POINT + TEAM DEATHMATCH (tl=24s)
+  const NMODES = MODES.length;
 
   const COL = {
     A: FIGHTERS.AXIOM.hex,           // cyan
@@ -2139,19 +2149,44 @@ if (typeof module !== 'undefined' && module.exports) {
 
   /* ==========================================================================
      GLOBAL MATCH CLOCK
-     The schedule is a PURE function of the wall clock + the fixed cycle, and the
-     sim is fully deterministic from the match index — so every client that knows
-     the time renders the exact same match, frame for frame, at the same instant.
-     No server needs to stream the match; the "live screen" is identical everywhere
-     (the only drift is each device's clock skew, normally well under a second).
+     The schedule is a PURE function of the wall clock + a fixed per-mode cycle table,
+     and the sim is fully deterministic from the match index — so every client that
+     knows the time renders the exact same match, frame for frame, at the same instant.
+     Cycle LENGTH varies by mode (some modes get a longer FIGHT window), but because
+     modes repeat every NMODES matches the timing repeats too, so the wall-clock -> match
+     mapping is still a closed-form lookup. No server needs to stream the match.
      ======================================================================== */
+  // per-mode-slot timing tables (slot m corresponds to MODES[m]; match i plays MODES[i % NMODES])
+  const FIGHT_MS_SLOT = MODES.map((m) => FIGHT_MS_BY_KEY[m.key] || FIGHT_MS_DEFAULT);
+  const CYCLE_LENS = FIGHT_MS_SLOT.map((f) => BET_MS + f + RESULT_MS);
+  const PREFIX = (() => { const p = [0]; for (let i = 0; i < CYCLE_LENS.length; i++) p.push(p[i] + CYCLE_LENS[i]); return p; })();
+  const SUPER_MS = PREFIX[PREFIX.length - 1];     // wall-time for one full pass through all modes
+  const CYCLE_MS = Math.round(SUPER_MS / NMODES); // legacy alias: average cycle (rough fallbacks only)
+
   function vnow() { return Date.now(); }   // identical clock for all clients -> identical match feed
-  function matchIndexAt(t) { return Math.floor(t / CYCLE_MS); }
+  function _slotAt(rem) { let m = 0; while (m < NMODES - 1 && rem >= PREFIX[m + 1]) m++; return m; }
+  function matchIndexAt(t) {
+    if (!isFinite(t) || t < 0) t = 0;
+    const nSuper = Math.floor(t / SUPER_MS);
+    return nSuper * NMODES + _slotAt(t - nSuper * SUPER_MS);
+  }
   function phaseAt(t) {
-    const into = t % CYCLE_MS;
+    if (!isFinite(t) || t < 0) t = 0;
+    const nSuper = Math.floor(t / SUPER_MS);
+    const rem = t - nSuper * SUPER_MS;
+    const m = _slotAt(rem);
+    const into = rem - PREFIX[m];                 // ms into THIS match's cycle
+    const fightMs = FIGHT_MS_SLOT[m];
     if (into < BET_MS) return { phase: 'BET', into, left: BET_MS - into };
-    if (into < BET_MS + FIGHT_MS) return { phase: 'FIGHT', into: into - BET_MS, left: BET_MS + FIGHT_MS - into };
-    return { phase: 'RESULT', into: into - BET_MS - FIGHT_MS, left: CYCLE_MS - into };
+    if (into < BET_MS + fightMs) return { phase: 'FIGHT', into: into - BET_MS, left: BET_MS + fightMs - into };
+    return { phase: 'RESULT', into: into - BET_MS - fightMs, left: CYCLE_LENS[m] - into };
+  }
+  function msToNextMatch(t) {                      // ms until the current cycle ends (the next match begins)
+    if (!isFinite(t) || t < 0) t = 0;
+    const nSuper = Math.floor(t / SUPER_MS);
+    const rem = t - nSuper * SUPER_MS;
+    const m = _slotAt(rem);
+    return CYCLE_LENS[m] - (rem - PREFIX[m]);
   }
   // strong 32-bit hash so adjacent cycles produce very different matches
   function seedForMatch(idx) {
@@ -2361,7 +2396,7 @@ if (typeof module !== 'undefined' && module.exports) {
   // Per-map AXIOM win rate, MEASURED over thousands of headless matches (not a guess): GAUNTLET leans
   // AXIOM, PILLARS leans NEMESIS, the rest are near-even. Kept a PRIOR (never the real result) so it
   // can never spoil the deterministic outcome — it only sharpens your read before you bet.
-  const MAP_WR_A = { 'ATRIUM': 0.485, 'PILLARS': 0.437, 'THE CROSS': 0.487, 'GAUNTLET': 0.544, 'REDOUBT': 0.487 };
+  const MAP_WR_A = { 'ATRIUM': 0.484, 'PILLARS': 0.424, 'THE CROSS': 0.492, 'GAUNTLET': 0.524, 'REDOUBT': 0.502 };
   const _mapWrMean = (() => { const v = MAPS.map((m) => (MAP_WR_A[m.name] != null ? MAP_WR_A[m.name] : 0.485)); return v.reduce((s, x) => s + x, 0) / (v.length || 1); })();
   function mapForIdx(idx) { return hash32((idx | 0) * 2 + 0x55) % MAPS.length; }
   function mapDeltaA(idx) { const m = MAPS[mapForIdx(idx)]; const wr = (m && MAP_WR_A[m.name] != null) ? MAP_WR_A[m.name] : _mapWrMean; return wr - _mapWrMean; }
@@ -2465,7 +2500,7 @@ if (typeof module !== 'undefined' && module.exports) {
     balance: $('balance'), stakeDec: $('stake-dec'), stakeVal: $('stake-val'), stakeInc: $('stake-inc'),
     chip10: $('chip-10'), chip50: $('chip-50'), chip100: $('chip-100'), chipMax: $('chip-max'),
     betA: $('bet-a'), betB: $('bet-b'), bdogA: $('bdog-a'), bdogB: $('bdog-b'), activeBet: $('active-bet'), payout: $('payout'),
-    feed: $('feed'), board: $('board'), handle: $('handle'),
+    feed: $('feed'), board: $('board'), boardTitle: $('board-title'), handle: $('handle'),
     nameInput: $('name-input'), floor: $('floor'), floorPa: $('floor-pa'), floorPb: $('floor-pb'),
     floorFa: $('floor-fa'), floorFb: $('floor-fb'), floorMeta: $('floor-meta'),
     viewers: $('viewers'), chatCount: $('chat-count'),
@@ -3458,7 +3493,7 @@ if (typeof module !== 'undefined' && module.exports) {
     if (ph.phase === 'FIGHT') {
       const target = ph.into / 1000;
       let guard = 0;
-      while (matchRef && !matchRef.over && matchRef.t < target && guard < 1300) {
+      while (matchRef && !matchRef.over && matchRef.t < target && guard < 1700) {
         matchRef.step(DT);
         replayRecord(matchRef);
         if (target - matchRef.t < 0.3) consumeEvents(matchRef.events); // suppress fast-forward burst
@@ -3587,14 +3622,14 @@ if (typeof module !== 'undefined' && module.exports) {
       if (this.mode !== 'backend' || !this._sb) return;
       try { await this._sb.from('scores').upsert({ player: handle, name: name, credits: Math.max(0, Math.round(creds)), updated_at: new Date().toISOString() }, { onConflict: 'player' }); } catch (e) {}
     },
-    async fetchLeaderboard() {   // top rows of the global board; null on any failure (caller falls back to local)
+    async fetchLeaderboard() {   // array on success, {error} when connected-but-failed, null when not connected
       if (this.mode !== 'backend' || !this._sb) return null;
       try {
         const { data, error } = await this._sb.from('scores')
-          .select('name,credits,player').order('credits', { ascending: false }).limit(20);
-        if (error) return null;
-        return Array.isArray(data) ? data : null;
-      } catch (e) { return null; }
+          .select('*').order('credits', { ascending: false }).limit(20);
+        if (error) return { error: error.message || 'query failed' };
+        return Array.isArray(data) ? data : [];
+      } catch (e) { return { error: (e && e.message) || 'network error' }; }
     },
     _syncViewers(st) {
       const names = [];
@@ -3657,7 +3692,16 @@ if (typeof module !== 'undefined' && module.exports) {
   function renderBoard() {
     if (!el.board) return;
     const add = (cls, html) => { const d = document.createElement('div'); d.className = cls; d.innerHTML = html; el.board.appendChild(d); };
+    const setTitle = (t) => { if (el.boardTitle) el.boardTitle.textContent = t; };
+    // connected but the scores query failed -> show WHY instead of silently looking empty
+    if (net.mode === 'backend' && leaderboardCache && leaderboardCache.error) {
+      setTitle('LEADERBOARD');
+      el.board.innerHTML = '';
+      add('lb-note', 'Leaderboard can\u2019t load. Your Supabase <b>scores</b> table needs the one-time setup SQL (see the leaderboard setup guide) \u2014 run it once, then reload.');
+      return;
+    }
     if (net.mode === 'backend' && Array.isArray(leaderboardCache)) {
+      setTitle('LEADERBOARD');
       const rows = leaderboardCache;
       let mine = -1;
       rows.forEach((r, i) => { if (r && r.player === handle) mine = i; });
@@ -3677,6 +3721,7 @@ if (typeof module !== 'undefined' && module.exports) {
       return;
     }
     // offline / solo -> personal stat rows
+    setTitle('STANDINGS');
     const rows = boardCache.length ? boardCache : [{ k: 'Balance', v: fmt(Math.round(credits)) + ' tk' }];
     el.board.innerHTML = '';
     rows.forEach((e) => add('stat-row', '<span class="st-k">' + escapeHtml(e.k || '') + '</span><span class="st-v">' + escapeHtml(e.v || '') + '</span>'));
@@ -3842,7 +3887,7 @@ if (typeof module !== 'undefined' && module.exports) {
     const ph = phaseAt(vnow()).phase;
     const show = !!decided && (ph === 'RESULT' || ph === 'FIGHT');
     el.nextIn.classList.toggle('on', show);
-    if (show) el.nextIn.innerHTML = 'NEXT MATCH IN <b>' + Math.max(1, Math.ceil((CYCLE_MS - (vnow() % CYCLE_MS)) / 1000)) + 's</b>';
+    if (show) el.nextIn.innerHTML = 'NEXT MATCH IN <b>' + Math.max(1, Math.ceil(msToNextMatch(vnow()) / 1000)) + 's</b>';
   }
   function chatTick(dt) {
     commentaryTick(); decayHype(dt); updateStatHud(); updatePredBar(); updateCountdown();
@@ -3998,7 +4043,7 @@ if (typeof module !== 'undefined' && module.exports) {
     ticker(handle, 'unlocked ' + itemName, '#8B7FFF', true);
     net.sendBuy(itemName);
   }
-  function perkActive(kind) { return !!(perks[kind] && perks[kind].owned && perks[kind].on); }
+  function perkActive(kind) { return !!(perks[kind] && perks[kind].owned); }   // one-time unlock => permanently active (no toggle)
   function perkName(kind) { return kind === 'dirReplay' ? 'Director\u2019s Replay' : kind === 'insure' ? 'Bet Insurance' : kind === 'analytics' ? 'Combat Analytics' : kind === 'predict' ? 'Predictive Model' : kind; }
   async function payTreasury(amt, label) {
     if (credits < amt) { showToast('Need ' + fmt(amt) + ' tokens', false); addFeed('Not enough tokens for ' + label + ' (' + fmt(amt) + ' cr).', '#8B7FFF'); return false; }
@@ -4026,7 +4071,7 @@ if (typeof module !== 'undefined' && module.exports) {
   }
   async function togglePerk(kind) {
     const p = perks[kind];
-    if (p.owned) { disarmPerk(); p.on = !p.on; applyPerks(); await persistPlayer(); updatePerkUI(); showToast(perkName(kind) + (p.on ? ' ON' : ' OFF') + ' \u2014 ' + (PERK_SHORT[kind] || ''), true); return; }  // free toggle
+    if (p.owned) { disarmPerk(); showToast(perkName(kind) + ' \u2713 active \u00b7 ' + (PERK_SHORT[kind] || '') + ' (permanent)', true); return; }  // already unlocked: permanent, just re-show what it does
     // not owned -> this is a PURCHASE. First tap arms it; a deliberate second tap confirms.
     if (_armedPerk !== kind) { if (!_purchasing) armPerk(kind); return; }
     if (vnow() - _armedAt < ARM_MIN_MS) return;     // second tap came too fast -> ignore (likely an accidental double-tap)
@@ -4048,7 +4093,7 @@ if (typeof module !== 'undefined' && module.exports) {
       b.classList.toggle('owned', owned);
       b.classList.toggle('arming', armed);
       const cost = b.querySelector('.perk-cost');
-      if (cost) cost.textContent = owned ? (active ? 'ON' : 'OFF') : (armed ? 'CONFIRM?' : fmt(PERK_COST[kind]));
+      if (cost) cost.textContent = owned ? 'ON' : (armed ? 'CONFIRM?' : fmt(PERK_COST[kind]));
     };
     setT(el.perkReplay, 'dirReplay'); setT(el.perkInsure, 'insure'); setT(el.perkAnalytics, 'analytics'); setT(el.perkPredict, 'predict');
   }
