@@ -272,6 +272,12 @@
   .intel-odds b{color:var(--text)}
   .io-bonus{margin-top:9px; padding:9px 11px; border-radius:9px; background:rgba(139,127,255,.08); border:1px solid #33305a}
   .io-bonus b{color:var(--violet)}
+  .io-upgrades{margin-top:10px; display:flex; flex-direction:column; gap:8px}
+  .iu-row{padding:9px 11px; border-radius:9px; background:#0a0e16; border:1px solid var(--border)}
+  .iu-h{display:flex; justify-content:space-between; align-items:baseline; gap:8px; margin-bottom:3px}
+  .iu-name{font-family:var(--disp); font-size:12.5px; font-weight:600; color:var(--text)}
+  .iu-cost{font-family:var(--mono); font-size:11px; color:var(--violet); white-space:nowrap}
+  .iu-desc{font-size:11.5px; line-height:1.5; color:#aeb8c4}
   /* game modes reference */
   .modes-lead{font-size:12.5px; line-height:1.5; color:#c7d0da; margin-bottom:13px}
   .modes-list{display:flex; flex-direction:column; gap:8px}
@@ -343,6 +349,10 @@
   .pred-row{display:flex; justify-content:space-between; align-items:center; font-family:var(--mono); font-size:11px; font-variant-numeric:tabular-nums}
   .pred-pa{color:var(--a)} .pred-pb{color:var(--b)}
   .pred-tag{font-size:8px; letter-spacing:.12em; color:var(--muted)}
+  .pred-factors{display:flex; justify-content:center; gap:12px; margin-top:5px; flex-wrap:wrap}
+  .pred-factors .pf{font-family:var(--mono); font-size:8.5px; letter-spacing:.04em; white-space:nowrap}
+  .pred-factors .pf-k{color:var(--muted)}
+  .pred-factors .pf-v{font-weight:600}
   /* next-match countdown (shown once a round is decided so the wait reads as a countdown, not dead air) */
   .next-in{position:absolute; left:50%; bottom:58px; transform:translateX(-50%); z-index:11; display:none; font-family:var(--mono); font-size:10px; letter-spacing:.14em; color:var(--muted); padding:6px 13px; background:rgba(8,11,16,.72); border:1px solid var(--border); border-radius:20px; backdrop-filter:blur(6px); pointer-events:none}
   .next-in.on{display:block}
@@ -611,6 +621,11 @@
         <p class="io-bonus"><b>⚡ Underdog bonus:</b> backing the underdog pays <b>extra</b> — the bigger the longshot, the bigger the boost (look for the <b>UNDERDOG +%</b> tag on the bet button). High risk, high reward: you'll lose most of them, but an upset pays off big.</p>
         <div class="io-matchup" id="io-matchup"></div>
       </div>
+      <div class="intel-odds intel-upgrades">
+        <div class="io-title">UPGRADES — one-time unlocks</div>
+        <p>Find these in the <b>UPGRADES</b> bar at the bottom-left, under the arena. Each is bought <b>once</b> with tokens, then toggled on/off for free. They're cosmetic or informational and <b>never change who wins</b>. On a touch screen, tap an upgrade once to see what it does and its price, then tap again to confirm.</p>
+        <div class="io-upgrades" id="io-upgrades"></div>
+      </div>
       <button class="modal-cta" id="intel-go">GOT IT — START BETTING</button>
     </div>
   </div>
@@ -667,6 +682,7 @@
       <div class="pred-head"><span>◢ WIN FORECAST · NEXT MATCH</span><span class="pred-acc" id="pred-acc"></span></div>
       <div class="pred-track"><div class="pred-fill pred-a" id="pred-fill-a" style="width:50%"></div><div class="pred-fill pred-b" id="pred-fill-b" style="width:50%"></div></div>
       <div class="pred-row"><span class="pred-pa" id="pred-pct-a">50%</span><span class="pred-tag" id="pred-tag">EVEN</span><span class="pred-pb" id="pred-pct-b">50%</span></div>
+      <div class="pred-factors" id="pred-factors"></div>
     </div>
     <div id="emote-layer" class="emote-layer" aria-hidden="true"></div>
     <div id="replay-bar" class="replay-bar" aria-hidden="true">
@@ -759,11 +775,11 @@
     </div>
 
     <div class="perk-dock" id="perk-dock">
-      <span class="perk-lbl">UPGRADES <span class="perk-sub">one-time</span></span>
-      <button class="perk-btn" id="perk-analytics" title="Combat Analytics: a live telemetry panel (accuracy, DPS, hits, crits, damage, shields, range) plus floating damage numbers over every hit. One-time unlock, toggle anytime. Never changes who wins.">ANALYTICS <span class="perk-cost">150</span></button>
-      <button class="perk-btn" id="perk-predict" title="Predictive Model: a win-probability forecast for the UPCOMING match, shown while bets are open, so you can read the matchup before you wager. Tracks how often the favorite actually wins. One-time unlock. Never changes the result.">PREDICTIONS <span class="perk-cost">200</span></button>
-      <button class="perk-btn" id="perk-insure" title="Bet Insurance: when a bet loses, 25% of your stake is refunded. One-time unlock, toggle anytime. Never changes who wins.">INSURANCE <span class="perk-cost">250</span></button>
-      <button class="perk-btn" id="perk-replay" title="Director's Cut kill-cam: longer, slower instant replays. One-time unlock.">REPLAY+ <span class="perk-cost">100</span></button>
+      <span class="perk-lbl">UPGRADES <span class="perk-sub">one-time · tap for info</span></span>
+      <button class="perk-btn" id="perk-analytics">ANALYTICS <span class="perk-cost">150</span></button>
+      <button class="perk-btn" id="perk-predict">PREDICTIONS <span class="perk-cost">250</span></button>
+      <button class="perk-btn" id="perk-insure">INSURANCE <span class="perk-cost">350</span></button>
+      <button class="perk-btn" id="perk-replay">REPLAY+ <span class="perk-cost">75</span></button>
     </div>
 
     <div class="winner-banner" id="winner-banner"></div>
@@ -2153,28 +2169,46 @@ if (typeof module !== 'undefined' && module.exports) {
   }
 
   /* ==========================================================================
-     SAFE STORAGE  (artifact window.storage; missing keys THROW; never localStorage)
+     SAFE STORAGE — persists across reloads on a real device.
+     Priority: artifact window.storage (when embedded) -> browser localStorage
+     (standalone file / hosted page) -> in-memory (last resort). Missing keys
+     never throw. The localStorage path is what makes a downloaded .html file
+     remember your balance, history, and one-time upgrades after a refresh.
      ======================================================================== */
   const mem = Object.create(null);
   const hasStore =
     typeof window !== 'undefined' && window.storage &&
     typeof window.storage.get === 'function';
+  // Probe localStorage once — Safari private mode and some file:// contexts make it throw.
+  const LS = (() => {
+    try {
+      if (typeof window === 'undefined' || !window.localStorage) return null;
+      const k = '__na_probe__';
+      window.localStorage.setItem(k, '1'); window.localStorage.removeItem(k);
+      return window.localStorage;
+    } catch (e) { return null; }
+  })();
+  const lsKey = (shared, key) => 'na:' + (shared ? 's:' : 'l:') + key;
 
   async function rawGet(key, shared) {
     const mk = (shared ? 's:' : 'l:') + key;
-    if (!hasStore) return mk in mem ? mem[mk] : null;
-    try {
-      const r = await window.storage.get(key, shared);
-      return r ? r.value : null;
-    } catch (e) {
-      return mk in mem ? mem[mk] : null;
+    if (hasStore) {
+      try { const r = await window.storage.get(key, shared); if (r) return r.value; } catch (e) { /* fall through */ }
     }
+    if (LS) {
+      try { const v = LS.getItem(lsKey(shared, key)); if (v != null) return v; } catch (e) { /* fall through */ }
+    }
+    return mk in mem ? mem[mk] : null;
   }
   async function rawSet(key, value, shared) {
     const mk = (shared ? 's:' : 'l:') + key;
-    mem[mk] = value;                                   // always keep a local copy
-    if (!hasStore) return;
-    try { await window.storage.set(key, value, shared); } catch (e) { /* keep mem */ }
+    mem[mk] = value;                                   // always keep a same-session copy
+    if (hasStore) {
+      try { await window.storage.set(key, value, shared); } catch (e) { /* fall through to LS */ }
+    }
+    if (LS) {
+      try { LS.setItem(lsKey(shared, key), value); } catch (e) { /* keep mem */ }
+    }
   }
   async function jget(key, shared, fb) {
     const raw = await rawGet(key, shared);
@@ -2209,7 +2243,20 @@ if (typeof module !== 'undefined' && module.exports) {
   let econ = null;                  // { treasury (house bankroll), round, stats }
   let perks = { dirReplay: { owned: false, on: false }, analytics: { owned: false, on: false }, predict: { owned: false, on: false }, insure: { owned: false, on: false } };
   // every upgrade is a ONE-TIME unlock (priced low->high by impact); once owned it's toggled free
-  const PERK_COST = { dirReplay: 100, analytics: 150, predict: 200, insure: 250 };
+  const PERK_COST = { dirReplay: 75, analytics: 150, predict: 250, insure: 350 };
+  // what each upgrade does — shown on first tap (touch-friendly) and in the INTEL modal, so it's never hover-only
+  const PERK_SHORT = {
+    analytics: 'live combat telemetry + damage numbers',
+    predict:   'win forecast for the next match (reads mode + arena)',
+    insure:    'refunds 25% of a losing stake',
+    dirReplay: 'longer, slower cinematic replays',
+  };
+  const PERK_DESC = {
+    analytics: 'A live telemetry panel during the fight — accuracy, DPS, hits, crits, damage dealt, shields and range — plus floating damage numbers over every hit. Pure insight; it never changes who wins.',
+    predict:   'A win-probability forecast for the UPCOMING match, shown while bets are open. It weighs the active mode and the arena map, and tracks how often its favorite actually wins. A reading aid; it never changes the result.',
+    insure:    'A safety net: whenever a bet loses, 25% of your stake is refunded from the house bankroll. Softens losing streaks. It never changes who wins.',
+    dirReplay: 'Director\u2019s-cut kill-cam: longer, slower, more cinematic instant replays of the finishing blow. Pure flair.',
+  };
   const PERK_KEYS = ['dirReplay', 'analytics', 'predict', 'insure'];
   let poolCache = { a: 0, b: 0 };   // retained so HUD code that reads it stays happy
   let boardCache = [];
@@ -2309,6 +2356,29 @@ if (typeof module !== 'undefined' && module.exports) {
     const r = mulberry32(seedForMatch(idx) ^ 0x9e3779b9)();
     return clampN(prior + (r - 0.5) * 0.08, 0.10, 0.90);
   }
+
+  // ---- richer pre-match FORECAST: mode prior + arena-map effect, both calibrated from the sim ----
+  // Per-map AXIOM win rate, MEASURED over thousands of headless matches (not a guess): GAUNTLET leans
+  // AXIOM, PILLARS leans NEMESIS, the rest are near-even. Kept a PRIOR (never the real result) so it
+  // can never spoil the deterministic outcome — it only sharpens your read before you bet.
+  const MAP_WR_A = { 'ATRIUM': 0.485, 'PILLARS': 0.437, 'THE CROSS': 0.487, 'GAUNTLET': 0.544, 'REDOUBT': 0.487 };
+  const _mapWrMean = (() => { const v = MAPS.map((m) => (MAP_WR_A[m.name] != null ? MAP_WR_A[m.name] : 0.485)); return v.reduce((s, x) => s + x, 0) / (v.length || 1); })();
+  function mapForIdx(idx) { return hash32((idx | 0) * 2 + 0x55) % MAPS.length; }
+  function mapDeltaA(idx) { const m = MAPS[mapForIdx(idx)]; const wr = (m && MAP_WR_A[m.name] != null) ? MAP_WR_A[m.name] : _mapWrMean; return wr - _mapWrMean; }
+  function forecastA(idx) {
+    const m = MODES[(((idx % MODES.length) + MODES.length) % MODES.length)];
+    const modeP = (m && typeof m.baseA === 'number') ? m.baseA : 0.5;
+    const jit = (mulberry32(seedForMatch(idx) ^ 0x9e3779b9)() - 0.5) * 0.05;   // small irreducible per-match variance
+    return clampN(modeP + mapDeltaA(idx) + jit, 0.10, 0.90);
+  }
+  function forecastFactors(idx) {
+    const m = MODES[(((idx % MODES.length) + MODES.length) % MODES.length)];
+    const md = ((m && typeof m.baseA === 'number') ? m.baseA : 0.5) - 0.5;     // mode lean vs even
+    const xd = mapDeltaA(idx);                                                  // arena lean vs map-average
+    const mp = MAPS[mapForIdx(idx)];
+    const lab = (d) => (d >= 0 ? '+' : '\u2212') + Math.round(Math.abs(d) * 100) + '% ' + (d > 0.012 ? 'A' : d < -0.012 ? 'N' : '\u00b7');
+    return [{ label: (m ? m.name : 'MODE'), txt: lab(md), pos: md }, { label: (mp ? mp.name : 'ARENA'), txt: lab(xd), pos: xd }];
+  }
   function clampN(x, lo, hi) { return x < lo ? lo : x > hi ? hi : x; }
   function r2(x) { return Math.round(x * 100) / 100; }
   // decimal odds for a side with true win-prob p. Favorites carry the house edge;
@@ -2386,11 +2456,11 @@ if (typeof module !== 'undefined' && module.exports) {
     statHud: $('stat-hud'), dmgLayer: $('dmg-layer'), shAccA: $('sh-acc-a'), shAccB: $('sh-acc-b'), shDpsA: $('sh-dps-a'), shDpsB: $('sh-dps-b'),
     shClock: $('sh-clock'), shDmgA: $('sh-dmg-a'), shDmgB: $('sh-dmg-b'), shHitA: $('sh-hit-a'), shHitB: $('sh-hit-b'),
     shCritA: $('sh-crit-a'), shCritB: $('sh-crit-b'), shShdA: $('sh-shd-a'), shShdB: $('sh-shd-b'), shRange: $('sh-range'),
-    predBar: $('pred-bar'), predAcc: $('pred-acc'), predFillA: $('pred-fill-a'), predFillB: $('pred-fill-b'), predPctA: $('pred-pct-a'), predPctB: $('pred-pct-b'), predTag: $('pred-tag'), nextIn: $('next-in'),
+    predBar: $('pred-bar'), predAcc: $('pred-acc'), predFillA: $('pred-fill-a'), predFillB: $('pred-fill-b'), predPctA: $('pred-pct-a'), predPctB: $('pred-pct-b'), predTag: $('pred-tag'), predFactors: $('pred-factors'), nextIn: $('next-in'),
     earnBtn: $('earn-tokens'), intelBtn: $('intel-btn'),
     schList: $('sch-list'), schInfo: $('sch-info'), emoteBar: $('emote-bar'), emoteLayer: $('emote-layer'), hypeFill: $('hype-fill'), hypePct: $('hype-pct'),
     modesWrap: $('modes-wrap'), modesX: $('modes-x'), modesList: $('modes-list'),
-    intelWrap: $('intel-wrap'), intelX: $('intel-x'), intelGo: $('intel-go'), icStatsA: $('ic-stats-a'), icStatsB: $('ic-stats-b'), ioMatchup: $('io-matchup'),
+    intelWrap: $('intel-wrap'), intelX: $('intel-x'), intelGo: $('intel-go'), icStatsA: $('ic-stats-a'), icStatsB: $('ic-stats-b'), ioMatchup: $('io-matchup'), ioUpgrades: $('io-upgrades'),
     miniWrap: $('mini-wrap'), miniX: $('mini-x'), miniCanvas: $('mini-canvas'), miniShots: $('mini-shots'), miniScore: $('mini-score'), miniAction: $('mini-action'), miniCooldown: $('mini-cooldown'),
     balance: $('balance'), stakeDec: $('stake-dec'), stakeVal: $('stake-val'), stakeInc: $('stake-inc'),
     chip10: $('chip-10'), chip50: $('chip-50'), chip100: $('chip-100'), chipMax: $('chip-max'),
@@ -3519,7 +3589,12 @@ if (typeof module !== 'undefined' && module.exports) {
     },
     async fetchLeaderboard() {   // top rows of the global board; null on any failure (caller falls back to local)
       if (this.mode !== 'backend' || !this._sb) return null;
-      try { const { data, error } = await this._sb.from('leaderboard').select('*'); if (error) return null; return Array.isArray(data) ? data : null; } catch (e) { return null; }
+      try {
+        const { data, error } = await this._sb.from('scores')
+          .select('name,credits,player').order('credits', { ascending: false }).limit(20);
+        if (error) return null;
+        return Array.isArray(data) ? data : null;
+      } catch (e) { return null; }
     },
     _syncViewers(st) {
       const names = [];
@@ -3738,18 +3813,23 @@ if (typeof module !== 'undefined' && module.exports) {
     el.predBar.classList.toggle('on', !!show);
     if (predState.idx !== curIdx) predState = { idx: curIdx, settled: false };
     if (show) {
-      const p = baseProbA(curIdx), pa = Math.round(p * 100), pb = 100 - pa;
+      const p = forecastA(curIdx), pa = Math.round(p * 100), pb = 100 - pa;
       if (el.predFillA) el.predFillA.style.width = pa + '%';
       if (el.predFillB) el.predFillB.style.width = pb + '%';
       if (el.predPctA) el.predPctA.textContent = pa + '%';
       if (el.predPctB) el.predPctB.textContent = pb + '%';
-      if (el.predTag) el.predTag.textContent = pa > 56 ? 'AXIOM FAVORED' : pb > 56 ? 'NEMESIS FAVORED' : 'TOSS-UP';
+      if (el.predTag) el.predTag.textContent = pa > 58 ? 'AXIOM FAVORED' : pb > 58 ? 'NEMESIS FAVORED' : pa > 52 ? 'AXIOM LEAN' : pb > 52 ? 'NEMESIS LEAN' : 'TOSS-UP';
       if (el.predAcc) el.predAcc.textContent = predRecord.total ? 'model right ' + Math.round(100 * predRecord.hit / predRecord.total) + '% (' + predRecord.total + ')' : 'forecast';
+      if (el.predFactors) {
+        el.predFactors.innerHTML = forecastFactors(curIdx).map((x) =>
+          '<span class="pf"><span class="pf-k">' + escapeHtml(x.label) + '</span> <span class="pf-v" style="color:' +
+          (x.pos > 0.012 ? COL.A : x.pos < -0.012 ? COL.B : 'var(--muted)') + '">' + escapeHtml(x.txt) + '</span></span>').join('');
+      }
     }
     // score the forecast once per match vs the real winner (honest "how often the favorite wins" stat)
     if (matchRef && matchRef.over && !predState.settled && matchRef.winner && matchRef.winner !== 'DRAW') {
       predState.settled = true;
-      const pick = baseProbA(curIdx) >= 0.5 ? 'AXIOM' : 'NEMESIS';
+      const pick = forecastA(curIdx) >= 0.5 ? 'AXIOM' : 'NEMESIS';
       predRecord.total++; if (pick === matchRef.winner) predRecord.hit++;
       persistPred();
     }
@@ -3816,6 +3896,13 @@ if (typeof module !== 'undefined' && module.exports) {
       const mode = matchRef ? matchRef.mode.name : 'this mode';
       el.ioMatchup.innerHTML = 'Right now <b style="color:' + (favA ? COL.A : COL.B) + '">' + favName + '</b> is favored in <b>' + escapeHtml(mode) + '</b> at \u00d7' + favOdds + '. ' +
         (favA ? 'The arena rewards AXIOM\u2019s range and precision \u2014 but one slip and the underdog cashes.' : 'The arena rewards NEMESIS\u2019s speed and close-range pressure \u2014 but if it gets kept at distance, the underdog cashes.');
+    }
+    if (el.ioUpgrades) {
+      const order = ['analytics', 'predict', 'insure', 'dirReplay'];
+      el.ioUpgrades.innerHTML = order.map((k) =>
+        '<div class="iu-row"><div class="iu-h"><span class="iu-name">' + escapeHtml(perkName(k)) +
+        '</span><span class="iu-cost">' + fmt(PERK_COST[k]) + ' tk</span></div>' +
+        '<div class="iu-desc">' + escapeHtml(PERK_DESC[k]) + '</div></div>').join('');
     }
     if (el.intelWrap) el.intelWrap.classList.add('on');
   }
@@ -3934,12 +4021,12 @@ if (typeof module !== 'undefined' && module.exports) {
     disarmPerk();
     _armedPerk = kind; _armedAt = vnow();
     _armTimer = setTimeout(() => { if (_armedPerk === kind) disarmPerk(); }, ARM_WINDOW_MS);
-    showToast('Tap ' + perkName(kind) + ' again to confirm \u00b7 ' + fmt(PERK_COST[kind]) + ' tk', true);
+    showToast(perkName(kind) + ': ' + (PERK_SHORT[kind] || '') + ' \u00b7 tap again to confirm (' + fmt(PERK_COST[kind]) + ' tk)', true);
     updatePerkUI();
   }
   async function togglePerk(kind) {
     const p = perks[kind];
-    if (p.owned) { disarmPerk(); p.on = !p.on; applyPerks(); await persistPlayer(); updatePerkUI(); return; }  // free toggle
+    if (p.owned) { disarmPerk(); p.on = !p.on; applyPerks(); await persistPlayer(); updatePerkUI(); showToast(perkName(kind) + (p.on ? ' ON' : ' OFF') + ' \u2014 ' + (PERK_SHORT[kind] || ''), true); return; }  // free toggle
     // not owned -> this is a PURCHASE. First tap arms it; a deliberate second tap confirms.
     if (_armedPerk !== kind) { if (!_purchasing) armPerk(kind); return; }
     if (vnow() - _armedAt < ARM_MIN_MS) return;     // second tap came too fast -> ignore (likely an accidental double-tap)
