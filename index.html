@@ -205,6 +205,7 @@
   .perk-btn.owned:not(.on){border-color:rgba(139,127,255,.5); color:var(--text)}
   .perk-btn.owned:not(.on) .perk-cost{color:var(--violet)}
   .perk-btn.arming{border-color:var(--b); color:var(--b); box-shadow:0 0 0 1px var(--b), 0 0 12px rgba(255,122,69,.35); animation:perkPulse .9s ease-in-out infinite}
+  .perk-btn.locked{opacity:.5}
   .perk-btn.arming .perk-cost{color:var(--b)}
   @keyframes perkPulse{0%,100%{opacity:1}50%{opacity:.62}}
   .perk-cost{font-size:8.5px; opacity:.8; padding:1px 4px; border-radius:5px; background:rgba(139,127,255,.16); color:var(--violet)}
@@ -491,6 +492,7 @@
   .lb-row{display:flex; align-items:center; gap:8px; padding:4px 3px; border-bottom:1px solid rgba(31,42,56,.4)}
   .lb-note{font-size:11px; line-height:1.5; color:var(--muted); padding:6px 2px}
   .lb-note b{color:var(--text)}
+  .lb-err{display:block; margin-top:5px; font-family:var(--mono); font-size:9.5px; color:var(--loss); word-break:break-word}
   .lb-row:last-child{border-bottom:none}
   .lb-rank{font-family:var(--mono); font-size:10px; color:var(--muted); width:24px; text-align:right; flex:none}
   .lb-name{font-family:var(--body); font-size:12px; color:var(--text); flex:1; overflow:hidden; text-overflow:ellipsis; white-space:nowrap}
@@ -624,8 +626,8 @@
         <div class="io-matchup" id="io-matchup"></div>
       </div>
       <div class="intel-odds intel-upgrades">
-        <div class="io-title">UPGRADES — one-time unlocks</div>
-        <p>Find these in the <b>UPGRADES</b> bar at the bottom-right, under the arena. Each is bought <b>once</b> with tokens and is then <b>permanently active</b> — there's no toggle to manage and it stays unlocked for good. They're cosmetic or informational and <b>never change who wins</b>. On a touch screen, tap an upgrade once to see what it does and its price, then tap again to confirm.</p>
+        <div class="io-title">UPGRADES — bought per round</div>
+        <p>Find these in the <b>UPGRADES</b> bar at the bottom-right, under the arena. You buy them <b>during the betting window</b>, and each one lasts for that <b>one match</b> — it expires when the round ends, so buy it again next round if you want it. They're cheap, cosmetic or informational, and <b>never change who wins</b>. On a touch screen, tap an upgrade once to see what it does and its price, then tap again to confirm.</p>
         <div class="io-upgrades" id="io-upgrades"></div>
       </div>
       <button class="modal-cta" id="intel-go">GOT IT — START BETTING</button>
@@ -777,7 +779,7 @@
     </div>
 
     <div class="perk-dock" id="perk-dock">
-      <span class="perk-lbl">UPGRADES <span class="perk-sub">one-time · permanent</span></span>
+      <span class="perk-lbl">UPGRADES <span class="perk-sub">per round · tap to buy</span></span>
       <button class="perk-btn" id="perk-analytics">ANALYTICS <span class="perk-cost">150</span></button>
       <button class="perk-btn" id="perk-predict">PREDICTIONS <span class="perk-cost">250</span></button>
       <button class="perk-btn" id="perk-insure">INSURANCE <span class="perk-cost">350</span></button>
@@ -2276,21 +2278,21 @@ if (typeof module !== 'undefined' && module.exports) {
   let activeBet = null;             // player's bet this round (UI view)
   let history = [];
   let econ = null;                  // { treasury (house bankroll), round, stats }
-  let perks = { dirReplay: { owned: false, on: false }, analytics: { owned: false, on: false }, predict: { owned: false, on: false }, insure: { owned: false, on: false } };
+  let perks = { dirReplay: { roundIdx: -1 }, analytics: { roundIdx: -1 }, predict: { roundIdx: -1 }, insure: { roundIdx: -1 } };
   // every upgrade is a ONE-TIME unlock (priced low->high by impact); once owned it's toggled free
-  const PERK_COST = { dirReplay: 75, analytics: 150, predict: 250, insure: 350 };
+  const PERK_COST = { dirReplay: 10, analytics: 15, predict: 30, insure: 25 };
   // what each upgrade does — shown on first tap (touch-friendly) and in the INTEL modal, so it's never hover-only
   const PERK_SHORT = {
-    analytics: 'live combat telemetry + damage numbers',
-    predict:   'win forecast for the next match (reads mode + arena)',
-    insure:    'refunds 25% of a losing stake',
-    dirReplay: 'longer, slower cinematic replays',
+    analytics: 'live combat telemetry + damage numbers, this match',
+    predict:   'win forecast for this match (reads mode + arena)',
+    insure:    'refunds 25% of this round\u2019s losing bet',
+    dirReplay: 'longer, slower cinematic replay of this finish',
   };
   const PERK_DESC = {
-    analytics: 'A live telemetry panel during the fight — accuracy, DPS, hits, crits, damage dealt, shields and range — plus floating damage numbers over every hit. Pure insight; it never changes who wins.',
-    predict:   'A win-probability forecast for the UPCOMING match, shown while bets are open. It weighs the active mode and the arena map, and tracks how often its favorite actually wins. A reading aid; it never changes the result.',
-    insure:    'A safety net: whenever a bet loses, 25% of your stake is refunded from the house bankroll. Softens losing streaks. It never changes who wins.',
-    dirReplay: 'Director\u2019s-cut kill-cam: longer, slower, more cinematic instant replays of the finishing blow. Pure flair.',
+    analytics: 'A live telemetry panel during this match — accuracy, DPS, hits, crits, damage dealt, shields and range — plus floating damage numbers over every hit. Pure insight; it never changes who wins. Lasts this round only.',
+    predict:   'A win-probability forecast for this match, shown while bets are open. It weighs the active mode and the arena map, and tracks how often its favorite actually wins. A reading aid; it never changes the result. Lasts this round only.',
+    insure:    'A safety net for this round: if the bet you place this match loses, 25% of your stake is refunded from the house bankroll. It never changes who wins. Lasts this round only.',
+    dirReplay: 'Director\u2019s-cut kill-cam for this match: a longer, slower, more cinematic instant replay of the finishing blow. Pure flair. Lasts this round only.',
   };
   const PERK_KEYS = ['dirReplay', 'analytics', 'predict', 'insure'];
   let poolCache = { a: 0, b: 0 };   // retained so HUD code that reads it stays happy
@@ -2330,7 +2332,7 @@ if (typeof module !== 'undefined' && module.exports) {
     if (!econ || typeof econ !== 'object' || !econ.stats) econ = genesisEcon();
     if (typeof econ.treasury !== 'number' || !isFinite(econ.treasury)) econ.treasury = 50000;
     const p = await jget('perks', false, null);
-    if (p && typeof p === 'object') { for (const k of PERK_KEYS) { if (p[k] && typeof p[k] === 'object') { perks[k].owned = !!p[k].owned; perks[k].on = !!p[k].on; } } }
+    if (p && typeof p === 'object') { for (const k of PERK_KEYS) { if (p[k] && typeof p[k] === 'object' && typeof p[k].roundIdx === 'number') { perks[k].roundIdx = p[k].roundIdx; } } }
     const pr = await jget('predRecord', false, null);
     if (pr && typeof pr === 'object' && typeof pr.total === 'number') predRecord = { hit: pr.hit || 0, total: pr.total || 0 };
     applyPerks();
@@ -3686,7 +3688,8 @@ if (typeof module !== 'undefined' && module.exports) {
   let leaderboardCache = null;     // null = offline/unknown -> personal stats; array = global rows
   let _lbLast = 0;
   async function refreshLeaderboard() {
-    leaderboardCache = await net.fetchLeaderboard();   // array online, null offline/failed
+    leaderboardCache = await net.fetchLeaderboard();   // array online, {error} connected-but-failed, null offline
+    if (leaderboardCache && leaderboardCache.error) console.warn('Leaderboard fetch failed:', leaderboardCache.error);
     renderBoard();
   }
   function renderBoard() {
@@ -3697,7 +3700,8 @@ if (typeof module !== 'undefined' && module.exports) {
     if (net.mode === 'backend' && leaderboardCache && leaderboardCache.error) {
       setTitle('LEADERBOARD');
       el.board.innerHTML = '';
-      add('lb-note', 'Leaderboard can\u2019t load. Your Supabase <b>scores</b> table needs the one-time setup SQL (see the leaderboard setup guide) \u2014 run it once, then reload.');
+      add('lb-note', 'Leaderboard can\u2019t load \u2014 the global <b>scores</b> table isn\u2019t readable yet. Run the setup SQL from the guide (it\u2019s safe to re-run), then reload.' +
+        '<br><span class="lb-err">Supabase says: ' + escapeHtml(String(leaderboardCache.error)) + '</span>');
       return;
     }
     if (net.mode === 'backend' && Array.isArray(leaderboardCache)) {
@@ -4030,7 +4034,7 @@ if (typeof module !== 'undefined' && module.exports) {
     hypeFX = false;                   // (Hype FX retired — replaced by Insurance + Analytics)
     analyticsOn = perkActive('analytics');
     predictOn = perkActive('predict');
-    // visibility is decided per-frame by updateStatHud (FIGHT) / updatePredBar (BET); here we only hide when toggled off
+    // visibility is decided per-frame by updateStatHud (FIGHT) / updatePredBar (BET); here we only hide when expired
     if (el.statHud && !analyticsOn) el.statHud.classList.remove('on');
     if (el.predBar && !predictOn) el.predBar.classList.remove('on');
     if (perkActive('dirReplay')) { REPLAY_WINDOW = 4.2; REPLAY_SLOW = 0.30; DEATH_HOLD = 1.5; }
@@ -4038,12 +4042,13 @@ if (typeof module !== 'undefined' && module.exports) {
   }
   // purchase notification: a local toast + feed line, broadcast to other watchers when online
   function notifyPurchase(itemName, cost) {
-    showToast('Unlocked ' + itemName + ' \u2713', true);
-    addFeed('\u2713 You unlocked ' + itemName + ' (' + fmt(cost) + ' tokens)', '#8B7FFF');
-    ticker(handle, 'unlocked ' + itemName, '#8B7FFF', true);
+    showToast('Activated ' + itemName + ' for this round \u2713', true);
+    addFeed('\u2713 You activated ' + itemName + ' this round (' + fmt(cost) + ' tokens)', '#8B7FFF');
+    ticker(handle, 'activated ' + itemName, '#8B7FFF', true);
     net.sendBuy(itemName);
   }
-  function perkActive(kind) { return !!(perks[kind] && perks[kind].owned); }   // one-time unlock => permanently active (no toggle)
+  // PER-ROUND upgrades: an upgrade you buy is active only for the match it was bought in, then expires.
+  function perkActive(kind) { return !!(perks[kind] && perks[kind].roundIdx === curIdx); }
   function perkName(kind) { return kind === 'dirReplay' ? 'Director\u2019s Replay' : kind === 'insure' ? 'Bet Insurance' : kind === 'analytics' ? 'Combat Analytics' : kind === 'predict' ? 'Predictive Model' : kind; }
   async function payTreasury(amt, label) {
     if (credits < amt) { showToast('Need ' + fmt(amt) + ' tokens', false); addFeed('Not enough tokens for ' + label + ' (' + fmt(amt) + ' cr).', '#8B7FFF'); return false; }
@@ -4052,11 +4057,10 @@ if (typeof module !== 'undefined' && module.exports) {
     return true;
   }
   // ---- accidental-purchase protection ----------------------------------------
-  // Upgrades are real spends, and a fast double-tap (easy on a touch screen) could otherwise fire
-  // two unlock calls before `owned` flips true and charge twice. So: (a) an unlock needs a deliberate
-  // SECOND tap to confirm, (b) a too-fast second tap is ignored (a nervous double-tap can't confirm),
-  // and (c) a synchronous lock guarantees only one charge can ever be in flight. Owned upgrades just
-  // toggle on/off for free, with none of this.
+  // Upgrades are real spends, and a fast double-tap (easy on a touch screen) could otherwise fire two
+  // buy calls and charge twice. So: (a) a buy needs a deliberate SECOND tap to confirm, (b) a too-fast
+  // second tap is ignored (a nervous double-tap can't confirm), and (c) a synchronous lock guarantees
+  // only one charge can ever be in flight.
   const ARM_WINDOW_MS = 3200;   // a pending confirm auto-cancels after this
   const ARM_MIN_MS = 260;       // ignore a confirm tap faster than this (treat it as an accidental double-tap)
   let _purchasing = false;
@@ -4066,13 +4070,14 @@ if (typeof module !== 'undefined' && module.exports) {
     disarmPerk();
     _armedPerk = kind; _armedAt = vnow();
     _armTimer = setTimeout(() => { if (_armedPerk === kind) disarmPerk(); }, ARM_WINDOW_MS);
-    showToast(perkName(kind) + ': ' + (PERK_SHORT[kind] || '') + ' \u00b7 tap again to confirm (' + fmt(PERK_COST[kind]) + ' tk)', true);
+    showToast(perkName(kind) + ': ' + (PERK_SHORT[kind] || '') + ' \u00b7 tap again to buy for this round (' + fmt(PERK_COST[kind]) + ' tk)', true);
     updatePerkUI();
   }
   async function togglePerk(kind) {
     const p = perks[kind];
-    if (p.owned) { disarmPerk(); showToast(perkName(kind) + ' \u2713 active \u00b7 ' + (PERK_SHORT[kind] || '') + ' (permanent)', true); return; }  // already unlocked: permanent, just re-show what it does
-    // not owned -> this is a PURCHASE. First tap arms it; a deliberate second tap confirms.
+    if (perkActive(kind)) { disarmPerk(); showToast(perkName(kind) + ' \u2713 active this round \u00b7 ' + (PERK_SHORT[kind] || ''), true); return; }  // already bought for this round
+    if (phaseAt(vnow()).phase !== 'BET') { disarmPerk(); showToast('Upgrades are bought in the betting window \u2014 they last one match', false); return; }
+    // PURCHASE for THIS round. First tap arms it; a deliberate second tap confirms.
     if (_armedPerk !== kind) { if (!_purchasing) armPerk(kind); return; }
     if (vnow() - _armedAt < ARM_MIN_MS) return;     // second tap came too fast -> ignore (likely an accidental double-tap)
     disarmPerk();
@@ -4080,20 +4085,22 @@ if (typeof module !== 'undefined' && module.exports) {
     _purchasing = true;
     try {
       if (!(await payTreasury(PERK_COST[kind], perkName(kind)))) return;
-      if (p.owned) return;                           // belt-and-braces: already unlocked, don't re-charge
-      p.owned = true; p.on = true; applyPerks();
+      if (perkActive(kind)) return;                  // belt-and-braces: already active this round, don't re-charge
+      p.roundIdx = curIdx; applyPerks();             // active for THIS match only; expires when the round rolls over
       notifyPurchase(perkName(kind), PERK_COST[kind]);
+      await persistPlayer();
     } finally { _purchasing = false; updatePerkUI(); }
   }
   function updatePerkUI() {
+    const inBet = phaseAt(vnow()).phase === 'BET';
     const setT = (b, kind) => {
       if (!b) return;
-      const owned = perks[kind].owned, active = perkActive(kind), armed = (_armedPerk === kind && !owned);
+      const active = perkActive(kind), armed = (_armedPerk === kind && !active);
       b.classList.toggle('on', active);
-      b.classList.toggle('owned', owned);
       b.classList.toggle('arming', armed);
+      b.classList.toggle('locked', !active && !inBet);   // can only buy during the betting window
       const cost = b.querySelector('.perk-cost');
-      if (cost) cost.textContent = owned ? 'ON' : (armed ? 'CONFIRM?' : fmt(PERK_COST[kind]));
+      if (cost) cost.textContent = active ? 'ACTIVE' : (armed ? 'CONFIRM?' : fmt(PERK_COST[kind]));
     };
     setT(el.perkReplay, 'dirReplay'); setT(el.perkInsure, 'insure'); setT(el.perkAnalytics, 'analytics'); setT(el.perkPredict, 'predict');
   }
@@ -4256,7 +4263,7 @@ if (typeof module !== 'undefined' && module.exports) {
     credits -= stake;                                        // stake is escrowed against the house
     round.bets.push({ who: 'YOU', side, amt: stake, odds });
     poolCache = poolFromRound(round, curIdx);
-    activeBet = { matchIndex: curIdx, side, stake, odds, settled: false };
+    activeBet = { matchIndex: curIdx, side, stake, odds, settled: false, insured: perkActive('insure') };
     addFeed('YOU bet ' + fmt(stake) + ' on ' + side + ' @ \u00d7' + odds.toFixed(2), side === 'AXIOM' ? COL.A : COL.B);
     ticker(handle, 'bet ' + fmt(stake) + ' on ' + side, side === 'AXIOM' ? COL.A : COL.B, true);
     if (floor.idx !== curIdx) floorReset(curIdx);
@@ -4297,8 +4304,8 @@ if (typeof module !== 'undefined' && module.exports) {
         else { showToast((won ? '+' : '\u2212') + fmt(Math.abs(delta)) + ' tk', won); }
         addFeed('BET ' + activeBet.result + ' on ' + activeBet.side + '  ' + (won ? '+' : '\u2212') + fmt(Math.abs(delta)), won ? COL.win : COL.loss);
         ticker(handle, (won ? 'won ' : 'lost ') + fmt(Math.abs(delta)) + ' tk', won ? COL.win : COL.loss, true);
-        // Bet Insurance perk — refund part of a losing stake (the house covers it; supply stays conserved)
-        if (!won && perkActive('insure')) {
+        // Bet Insurance perk — refund part of a losing stake IF insurance was active the round the bet was placed
+        if (!won && activeBet.insured) {
           const refund = Math.round(activeBet.stake * INSURE_RATE);
           if (refund > 0) {
             credits += refund; if (econ) econ.treasury -= refund;
@@ -4409,10 +4416,13 @@ if (typeof module !== 'undefined' && module.exports) {
       curIdx = idx;
       rebuildMatch(idx);
       refreshPool(idx);
+      applyPerks();                  // per-round upgrades from the previous match have now expired
+      updatePerkUI();
       curPhase = '';                 // force phase-enter for the new match
     }
     if (ph.phase !== curPhase) {
       curPhase = ph.phase;
+      updatePerkUI();                // refresh buy/locked state as the betting window opens/closes
       onPhaseEnter(ph.phase, idx);
     }
 
