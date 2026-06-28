@@ -39,10 +39,11 @@
 
   /* ---------- top bar ---------- */
   .topbar{
-    display:flex; align-items:center; justify-content:space-between; gap:14px;
+    display:flex; align-items:center; justify-content:space-between; gap:10px 12px; flex-wrap:wrap;
     background:linear-gradient(180deg,var(--panel2),var(--panel));
     border:1px solid var(--border); border-radius:13px; padding:10px 14px;
   }
+  .tb-left,.tb-mid,.tb-right{flex-wrap:wrap}
   .tb-left,.tb-mid,.tb-right{display:flex; align-items:center; gap:12px}
   .brand-name{font-family:var(--disp); font-weight:700; letter-spacing:.13em; font-size:14px}
   .brand-name b{
@@ -317,7 +318,7 @@
   .dmg-pop{position:absolute; transform:translate(-50%,-50%); font-family:var(--mono); font-weight:600; font-size:14px; letter-spacing:.02em; text-shadow:0 1px 4px rgba(0,0,0,.85); will-change:transform,opacity; white-space:nowrap}
   .dmg-pop.crit{font-size:19px; font-weight:700}
   /* Combat Analytics — advanced telemetry panel */
-  .stat-hud{position:absolute; top:12px; left:12px; z-index:10; display:none; flex-direction:column; padding:9px 11px 8px; background:rgba(8,11,16,.8); border:1px solid var(--border); border-radius:11px; backdrop-filter:blur(8px); pointer-events:none; min-width:206px; box-shadow:0 6px 22px rgba(0,0,0,.4)}
+  .stat-hud{position:absolute; top:188px; left:12px; z-index:10; display:none; flex-direction:column; padding:8px 10px 7px; background:rgba(8,11,16,.82); border:1px solid var(--border); border-radius:11px; backdrop-filter:blur(8px); pointer-events:none; min-width:200px; box-shadow:0 6px 22px rgba(0,0,0,.4)}
   .stat-hud.on{display:flex}
   .sh-title{display:flex; justify-content:space-between; align-items:center; font-family:var(--mono); font-size:8.5px; letter-spacing:.16em; color:var(--violet); padding-bottom:7px; margin-bottom:6px; border-bottom:1px solid var(--border)}
   .sh-clock{color:var(--text); opacity:.7; font-variant-numeric:tabular-nums}
@@ -329,7 +330,9 @@
   .sh-foot{display:flex; justify-content:space-between; font-family:var(--mono); font-size:8.5px; letter-spacing:.07em; color:var(--muted); margin-top:7px; padding-top:6px; border-top:1px solid var(--border)}
   .sh-foot span:last-child{color:var(--text); font-variant-numeric:tabular-nums}
   /* Predictions — live win-probability bar */
-  .pred-bar{position:absolute; top:12px; left:50%; transform:translateX(-50%); z-index:10; display:none; flex-direction:column; gap:5px; width:min(320px,46vw); padding:8px 11px; background:rgba(8,11,16,.78); border:1px solid var(--border); border-radius:11px; backdrop-filter:blur(8px); pointer-events:none}
+  .pred-bar{position:absolute; top:48px; left:50%; transform:translateX(-50%); z-index:10; display:none; flex-direction:column; gap:5px; width:min(320px, calc(100vw - 516px)); padding:8px 11px; background:rgba(8,11,16,.8); border:1px solid var(--border); border-radius:11px; backdrop-filter:blur(8px); pointer-events:none}
+  /* when predictions are showing, slide the objective HUD down so they stack instead of overlapping */
+  #pred-bar.on ~ #cap-hud{top:106px}
   .pred-bar.on{display:flex}
   .pred-head{display:flex; justify-content:space-between; align-items:center; font-family:var(--mono); font-size:8px; letter-spacing:.14em; color:var(--violet)}
   .pred-acc{color:var(--muted); letter-spacing:.06em}
@@ -341,7 +344,7 @@
   .pred-pa{color:var(--a)} .pred-pb{color:var(--b)}
   .pred-tag{font-size:8px; letter-spacing:.12em; color:var(--muted)}
   /* next-match countdown (shown once a round is decided so the wait reads as a countdown, not dead air) */
-  .next-in{position:absolute; left:50%; bottom:16px; transform:translateX(-50%); z-index:11; display:none; font-family:var(--mono); font-size:10px; letter-spacing:.14em; color:var(--muted); padding:6px 13px; background:rgba(8,11,16,.72); border:1px solid var(--border); border-radius:20px; backdrop-filter:blur(6px); pointer-events:none}
+  .next-in{position:absolute; left:50%; bottom:58px; transform:translateX(-50%); z-index:11; display:none; font-family:var(--mono); font-size:10px; letter-spacing:.14em; color:var(--muted); padding:6px 13px; background:rgba(8,11,16,.72); border:1px solid var(--border); border-radius:20px; backdrop-filter:blur(6px); pointer-events:none}
   .next-in.on{display:block}
   .next-in b{color:var(--violet); font-variant-numeric:tabular-nums}
   .emote-fly{position:absolute; font-size:30px; will-change:transform,opacity; animation:emoteFly 1.7s var(--ease) forwards}
@@ -459,6 +462,38 @@
   ::-webkit-scrollbar{width:7px;height:7px}
   ::-webkit-scrollbar-thumb{background:#1f2a38;border-radius:4px}
 
+  /* ---- social / cloud UI: editable name, live crowd "floor", viewers roster, global leaderboard ---- */
+  .name-input{background:#05080d; border:1px solid var(--border); border-radius:6px; color:var(--text);
+    font-family:var(--mono); font-size:10px; letter-spacing:.03em; padding:3px 7px; width:108px; text-align:right; outline:none}
+  .name-input:focus{border-color:var(--violet)}
+  .floor{display:none; align-items:center; gap:10px; margin:10px 0 0; padding:7px 13px;
+    background:linear-gradient(180deg,var(--panel2),var(--panel)); border:1px solid var(--border); border-radius:11px}
+  .floor.on{display:flex}
+  .floor-tag{font-family:var(--mono); font-size:9.5px; letter-spacing:.18em; color:var(--muted); white-space:nowrap}
+  .floor-pct{font-family:var(--mono); font-size:12px; font-weight:600; color:var(--a); min-width:40px; text-align:center}
+  .floor-pct.fb{color:var(--b)}
+  .floor-bar{flex:1; height:9px; border-radius:6px; overflow:hidden; display:flex; background:#0a0e14; border:1px solid #1a2230; min-width:70px}
+  .floor-fa{height:100%; background:linear-gradient(90deg,#1c8475,var(--a)); width:50%; transition:width .4s var(--ease)}
+  .floor-fb{height:100%; background:linear-gradient(90deg,var(--b),#b3471f); width:50%; transition:width .4s var(--ease)}
+  .floor-meta{font-family:var(--mono); font-size:9.5px; letter-spacing:.03em; color:var(--muted); white-space:nowrap}
+  .viewers{font-family:var(--mono); font-size:9px; letter-spacing:.02em; color:#5d6b7d;
+    margin:-3px 1px 6px; min-height:11px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap}
+  .lb-row{display:flex; align-items:center; gap:8px; padding:4px 3px; border-bottom:1px solid rgba(31,42,56,.4)}
+  .lb-row:last-child{border-bottom:none}
+  .lb-rank{font-family:var(--mono); font-size:10px; color:var(--muted); width:24px; text-align:right; flex:none}
+  .lb-name{font-family:var(--body); font-size:12px; color:var(--text); flex:1; overflow:hidden; text-overflow:ellipsis; white-space:nowrap}
+  .lb-cred{font-family:var(--mono); font-size:11px; color:var(--muted); flex:none}
+  .lb-row.you{background:rgba(139,127,255,.12); border-radius:7px; border-bottom-color:transparent}
+  .lb-row.you .lb-name{color:var(--violet); font-weight:600}
+  .lb-row.you .lb-rank{color:var(--violet)}
+  .lb-sep{height:1px; background:repeating-linear-gradient(90deg,#27313f 0 4px,transparent 4px 8px); margin:3px 2px}
+
+  @media (max-width:1200px){
+    /* iPad & small screens: the camera dock and upgrades dock were fighting for the bottom-centre/right.
+       Split them into opposite corners (camera bottom-left, upgrades bottom-right) so neither is covered. */
+    .cam-dock{left:12px; transform:none}
+    .perk-dock{max-width:64vw}
+  }
   @media (max-width:760px){
     .fighter-card{width:170px; padding:9px}
     .netwrap{height:50px}
@@ -470,10 +505,49 @@
     .vs-name{font-size:9px; letter-spacing:.06em}
     .perk-btn{padding:5px 7px; font-size:9px}
     .perk-lbl{display:none}
+    .perk-dock{max-width:74vw; gap:4px}
+    .stat-hud{top:166px; min-width:170px; padding:7px 8px}
+    .sh-grid{grid-template-columns:1fr 42px 42px; gap:2px 5px}
+    .sh-ch{font-size:9px}
+    .sh-v{font-size:10px}
+    .pred-bar{top:46px; width:min(300px, calc(100vw - 384px))}
     .intel-cards{grid-template-columns:1fr}
     .tb-btn{padding:6px 8px; font-size:9px}
     .bottom{grid-template-columns:1fr}
     .bet-actions{min-width:100%}
+  }
+  @media (max-width:520px){
+    /* phones: trim the stage to essentials so nothing overflows or overlaps in the common case.
+       (iPad is the primary target; this just keeps a ~360px screen usable rather than broken.) */
+    .topbar{padding:8px 10px; gap:8px 10px}
+    .brand-name{font-size:11.5px}
+    .map-pill,.match-id{display:none}
+    .mode-pill{min-width:0; padding:4px 9px}
+    .tb-btn{padding:5px 7px; font-size:8.5px}
+    .fighter-card{width:132px; padding:7px}
+    .netwrap{display:none}                 /* neural-net viz is unreadable at this size */
+    .fc-name{font-size:11px}
+    .fc-unit,.fc-acc,.ammo-lbl{display:none}
+    .fc-odds{font-size:11px; padding:1px 5px}
+    .fc-meta{margin-top:5px}
+    .vs-bar{display:none}                   /* cards already show HP; the topbar shows phase + timer */
+    .stat-hud{top:92px; left:8px; min-width:0; padding:6px 8px}
+    .sh-grid{grid-template-columns:1fr 38px 38px; gap:2px 4px}
+    .pred-bar{top:92px; left:50%; width:92vw}     /* override the between-cards calc() (negative on phones) */
+    .cap-hud{top:92px; width:200px}
+    #pred-bar.on ~ #cap-hud{top:92px}
+    .cam-dock{padding:3px; gap:3px}
+    .cam-btn{padding:5px 6px; font-size:8px}
+    .perk-dock{padding:4px 6px; gap:3px; max-width:86vw}
+    .perk-btn{padding:4px 6px; font-size:8px}
+    .perk-cost{font-size:7.5px}
+    .next-in{bottom:54px; font-size:9px; padding:5px 10px}
+    .stake-val{font-size:12px}
+    .chip{padding:6px 7px; font-size:10px}
+    .step-btn{width:26px; height:26px}
+    .floor{padding:6px 9px; gap:7px; margin-top:8px}
+    .floor-tag,.floor-meta{display:none}    /* keep just the split bar + percentages on phones */
+    .name-input{width:90px; font-size:9px}
   }
   @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
 </style>
@@ -590,7 +664,7 @@
       <div class="sh-foot"><span>SEPARATION</span><span id="sh-range">—</span></div>
     </div>
     <div id="pred-bar" class="pred-bar" aria-hidden="true">
-      <div class="pred-head"><span>◢ LIVE WIN PROBABILITY</span><span class="pred-acc" id="pred-acc"></span></div>
+      <div class="pred-head"><span>◢ WIN FORECAST · NEXT MATCH</span><span class="pred-acc" id="pred-acc"></span></div>
       <div class="pred-track"><div class="pred-fill pred-a" id="pred-fill-a" style="width:50%"></div><div class="pred-fill pred-b" id="pred-fill-b" style="width:50%"></div></div>
       <div class="pred-row"><span class="pred-pa" id="pred-pct-a">50%</span><span class="pred-tag" id="pred-tag">EVEN</span><span class="pred-pb" id="pred-pct-b">50%</span></div>
     </div>
@@ -687,7 +761,7 @@
     <div class="perk-dock" id="perk-dock">
       <span class="perk-lbl">UPGRADES <span class="perk-sub">one-time</span></span>
       <button class="perk-btn" id="perk-analytics" title="Combat Analytics: a live telemetry panel (accuracy, DPS, hits, crits, damage, shields, range) plus floating damage numbers over every hit. One-time unlock, toggle anytime. Never changes who wins.">ANALYTICS <span class="perk-cost">150</span></button>
-      <button class="perk-btn" id="perk-predict" title="Predictive Model: a live win-probability read that updates every frame from the match state, plus your prediction accuracy over time. One-time unlock. Never changes who wins.">PREDICTIONS <span class="perk-cost">200</span></button>
+      <button class="perk-btn" id="perk-predict" title="Predictive Model: a win-probability forecast for the UPCOMING match, shown while bets are open, so you can read the matchup before you wager. Tracks how often the favorite actually wins. One-time unlock. Never changes the result.">PREDICTIONS <span class="perk-cost">200</span></button>
       <button class="perk-btn" id="perk-insure" title="Bet Insurance: when a bet loses, 25% of your stake is refunded. One-time unlock, toggle anytime. Never changes who wins.">INSURANCE <span class="perk-cost">250</span></button>
       <button class="perk-btn" id="perk-replay" title="Director's Cut kill-cam: longer, slower instant replays. One-time unlock.">REPLAY+ <span class="perk-cost">100</span></button>
     </div>
@@ -702,12 +776,21 @@
   <section class="schedule" id="schedule">
     <span class="sch-lbl">UP NEXT</span>
     <div class="sch-list" id="sch-list"></div>
-    <button class="sch-info" id="sch-info" title="What do the modes mean?">13 MODES ⌕</button>
+    <button class="sch-info" id="sch-info" title="What do the modes mean?">11 MODES ⌕</button>
   </section>
   <div class="hype-wrap">
     <span class="hype-lbl">HYPE</span>
     <div class="hype-track"><div class="hype-fill" id="hype-fill"></div></div>
     <span class="hype-pct" id="hype-pct">0%</span>
+  </div>
+
+  <!-- live crowd betting sentiment (online only, betting phase) -->
+  <div class="floor" id="floor">
+    <span class="floor-tag">🏟 THE FLOOR</span>
+    <span class="floor-pct" id="floor-pa">—</span>
+    <div class="floor-bar"><div class="floor-fa" id="floor-fa"></div><div class="floor-fb" id="floor-fb"></div></div>
+    <span class="floor-pct fb" id="floor-pb">—</span>
+    <span class="floor-meta" id="floor-meta">waiting for the room…</span>
   </div>
 
   <section class="betbar">
@@ -742,11 +825,12 @@
       <div class="feed" id="feed"></div>
     </div>
     <div class="panel">
-      <div class="panel-head"><span class="panel-title">STANDINGS</span><span class="panel-title" id="handle"></span></div>
+      <div class="panel-head"><span class="panel-title">STANDINGS</span><input id="name-input" class="name-input" maxlength="16" placeholder="set name…" spellcheck="false" autocomplete="off" /></div>
       <div class="board" id="board"></div>
     </div>
     <div class="panel chat-panel">
       <div class="panel-head"><span class="panel-title">LIVE CHAT</span><span class="chat-count" id="chat-count">•</span></div>
+      <div class="viewers" id="viewers"></div>
       <div class="chat-log" id="chat-log"></div>
       <div class="emote-bar" id="emote-bar">
         <button class="emote" data-e="🔥">🔥</button>
@@ -1429,6 +1513,7 @@ class Match {
     this.mode = MODES[mi];
     this.modeIndex = mi;
     const fi = (Math.floor(matchIndex) || 0);
+    this.idx = fi;            // the match's global index (metadata; lets the UI key per-match state correctly)
     // map varies independently of mode for richer match-to-match variety
     const mapI = (opts && opts.mapIndex != null) ? opts.mapIndex : (hash32(fi * 2 + 0x55) % MAPS.length);
     this.map = MAPS[mapI];
@@ -2118,6 +2203,7 @@ if (typeof module !== 'undefined' && module.exports) {
   const UNDERDOG_BOOST = 0.55;      // extra payout for backing the underdog — scales with how big a longshot it is
   let credits = 1000;
   let handle = null;
+  let playerName = null;            // editable display name (handle stays the stable id for dedup/presence)
   let activeBet = null;             // player's bet this round (UI view)
   let history = [];
   let econ = null;                  // { treasury (house bankroll), round, stats }
@@ -2127,6 +2213,22 @@ if (typeof module !== 'undefined' && module.exports) {
   const PERK_KEYS = ['dirReplay', 'analytics', 'predict', 'insure'];
   let poolCache = { a: 0, b: 0 };   // retained so HUD code that reads it stays happy
   let boardCache = [];
+
+  function displayName() { return (playerName && playerName.trim()) ? playerName.trim() : handle; }
+  function cleanName(s) {
+    s = String(s == null ? '' : s).replace(/[\u0000-\u001f<>]/g, '').replace(/\s+/g, ' ').trim().slice(0, 16);
+    return s;
+  }
+  async function setPlayerName(raw) {
+    const next = cleanName(raw) || handle;
+    if (next === playerName) return;
+    playerName = next;
+    await jset('pname', playerName, false);
+    if (el.nameInput && document.activeElement !== el.nameInput) el.nameInput.value = playerName;
+    net.setName(playerName);                 // re-announce in presence
+    await pushScore();                         // update my leaderboard entry under the new name
+    await refreshLeaderboard();
+  }
 
   function genesisEcon() {
     return { treasury: 50000, round: null, stats: { bets: 0, wins: 0, losses: 0, best: 0, streak: 0, bestStreak: 0, earned: 0 } };
@@ -2140,6 +2242,8 @@ if (typeof module !== 'undefined' && module.exports) {
     econ = await jget('econ', false, null);
     if (typeof credits !== 'number' || !isFinite(credits)) credits = 1000;
     if (!handle) { handle = 'Player-' + Math.floor(1000 + Math.random() * 9000); await jset('handle', handle, false); }
+    playerName = await jget('pname', false, null);
+    if (!playerName || typeof playerName !== 'string') playerName = handle;
     if (!Array.isArray(history)) history = [];
     if (!econ || typeof econ !== 'object' || !econ.stats) econ = genesisEcon();
     if (typeof econ.treasury !== 'number' || !isFinite(econ.treasury)) econ.treasury = 50000;
@@ -2292,6 +2396,9 @@ if (typeof module !== 'undefined' && module.exports) {
     chip10: $('chip-10'), chip50: $('chip-50'), chip100: $('chip-100'), chipMax: $('chip-max'),
     betA: $('bet-a'), betB: $('bet-b'), bdogA: $('bdog-a'), bdogB: $('bdog-b'), activeBet: $('active-bet'), payout: $('payout'),
     feed: $('feed'), board: $('board'), handle: $('handle'),
+    nameInput: $('name-input'), floor: $('floor'), floorPa: $('floor-pa'), floorPb: $('floor-pb'),
+    floorFa: $('floor-fa'), floorFb: $('floor-fb'), floorMeta: $('floor-meta'),
+    viewers: $('viewers'), chatCount: $('chat-count'),
     toast: $('toast'),
   };
 
@@ -3371,14 +3478,17 @@ if (typeof module !== 'undefined' && module.exports) {
     room: 'arena-global',
   };
   const net = {
-    mode: 'local', ready: false, _subs: [], _emoteSubs: [], _buySubs: [], _online: 1, _sb: null, _ch: null,
+    mode: 'local', ready: false, _subs: [], _emoteSubs: [], _buySubs: [], _betSubs: [], _online: 1, _viewers: [], _sb: null, _ch: null,
     onMessage(cb) { this._subs.push(cb); },
     onEmote(cb) { this._emoteSubs.push(cb); },
     onBuy(cb) { this._buySubs.push(cb); },
+    onBet(cb) { this._betSubs.push(cb); },
     _emit(m) { for (const cb of this._subs) { try { cb(m); } catch (e) {} } },
     _emitEmote(m) { for (const cb of this._emoteSubs) { try { cb(m); } catch (e) {} } },
     _emitBuy(m) { for (const cb of this._buySubs) { try { cb(m); } catch (e) {} } },
+    _emitBet(m) { for (const cb of this._betSubs) { try { cb(m); } catch (e) {} } },
     online() { return this._online; },
+    viewers() { return this._viewers; },
     async connect() {
       if (BACKEND.url && BACKEND.anonKey) {
         try { await this._connectSupabase(); this.mode = 'backend'; }
@@ -3388,28 +3498,132 @@ if (typeof module !== 'undefined' && module.exports) {
     },
     async send(text) {
       text = (text || '').slice(0, 200).trim(); if (!text) return;
-      if (this.mode === 'backend' && this._ch) { try { await this._ch.send({ type: 'broadcast', event: 'msg', payload: { handle, text } }); } catch (e) {} }
-      else { this._emit({ handle, text, you: true }); }   // solo: local echo
+      this._emit({ handle, name: displayName(), text, you: true });   // always show MY OWN message locally (Supabase doesn't echo it back)
+      if (this.mode === 'backend' && this._ch) { try { await this._ch.send({ type: 'broadcast', event: 'msg', payload: { handle, name: displayName(), text } }); } catch (e) {} }
     },
     async sendEmote(emoji) {
-      if (this.mode === 'backend' && this._ch) { try { await this._ch.send({ type: 'broadcast', event: 'emote', payload: { handle, emoji } }); } catch (e) {} }
+      if (this.mode === 'backend' && this._ch) { try { await this._ch.send({ type: 'broadcast', event: 'emote', payload: { handle, name: displayName(), emoji } }); } catch (e) {} }
     },
     async sendBuy(item) {   // tell other watchers about an unlock (own copy is shown locally already)
-      if (this.mode === 'backend' && this._ch) { try { await this._ch.send({ type: 'broadcast', event: 'buy', payload: { handle, item } }); } catch (e) {} }
+      if (this.mode === 'backend' && this._ch) { try { await this._ch.send({ type: 'broadcast', event: 'buy', payload: { handle, name: displayName(), item } }); } catch (e) {} }
+    },
+    async sendBet(side, amount, idx) {   // tell the room about a wager (own copy added to the floor locally already)
+      if (this.mode === 'backend' && this._ch) { try { await this._ch.send({ type: 'broadcast', event: 'bet', payload: { handle, name: displayName(), side, amount, idx } }); } catch (e) {} }
+    },
+    setName(name) {   // re-announce presence under a new display name
+      if (this.mode === 'backend' && this._ch) { try { this._ch.track({ handle, name: name || displayName(), at: Date.now() }); } catch (e) {} }
+    },
+    async upsertScore(name, creds) {   // write my row into the global leaderboard table
+      if (this.mode !== 'backend' || !this._sb) return;
+      try { await this._sb.from('scores').upsert({ player: handle, name: name, credits: Math.max(0, Math.round(creds)), updated_at: new Date().toISOString() }, { onConflict: 'player' }); } catch (e) {}
+    },
+    async fetchLeaderboard() {   // top rows of the global board; null on any failure (caller falls back to local)
+      if (this.mode !== 'backend' || !this._sb) return null;
+      try { const { data, error } = await this._sb.from('leaderboard').select('*'); if (error) return null; return Array.isArray(data) ? data : null; } catch (e) { return null; }
+    },
+    _syncViewers(st) {
+      const names = [];
+      try { for (const k of Object.keys(st || {})) { const metas = st[k]; const m = (metas && metas[0]) || {}; names.push({ id: k, name: m.name || k }); } } catch (e) {}
+      this._online = Math.max(1, names.length);
+      this._viewers = names;
     },
     async _connectSupabase() {
       const mod = await import('https://esm.sh/@supabase/supabase-js@2');
       const sb = mod.createClient(BACKEND.url, BACKEND.anonKey, { auth: { persistSession: false } });
       this._sb = sb;
       const ch = sb.channel(BACKEND.room, { config: { presence: { key: handle } } });
-      ch.on('broadcast', { event: 'msg' }, (e) => { const p = e.payload || {}; this._emit({ handle: p.handle, text: p.text, you: p.handle === handle }); });
-      ch.on('broadcast', { event: 'emote' }, (e) => { const p = e.payload || {}; if (p.handle !== handle) this._emitEmote({ handle: p.handle, emoji: p.emoji }); });
-      ch.on('broadcast', { event: 'buy' }, (e) => { const p = e.payload || {}; if (p.handle !== handle) this._emitBuy({ handle: p.handle, item: p.item }); });
-      ch.on('presence', { event: 'sync' }, () => { const st = ch.presenceState(); this._online = Math.max(1, Object.keys(st).length); });
-      await new Promise((res, rej) => { ch.subscribe(async (status) => { if (status === 'SUBSCRIBED') { await ch.track({ handle, at: Date.now() }); res(); } else if (status === 'CHANNEL_ERROR' || status === 'TIMED_OUT') rej(new Error(status)); }); });
+      ch.on('broadcast', { event: 'msg' }, (e) => { const p = e.payload || {}; if (p.handle === handle) return; this._emit({ handle: p.handle, name: p.name, text: p.text, you: false }); });
+      ch.on('broadcast', { event: 'emote' }, (e) => { const p = e.payload || {}; if (p.handle !== handle) this._emitEmote({ handle: p.handle, name: p.name, emoji: p.emoji }); });
+      ch.on('broadcast', { event: 'buy' }, (e) => { const p = e.payload || {}; if (p.handle !== handle) this._emitBuy({ handle: p.handle, name: p.name, item: p.item }); });
+      ch.on('broadcast', { event: 'bet' }, (e) => { const p = e.payload || {}; if (p.handle !== handle) this._emitBet({ handle: p.handle, name: p.name, side: p.side, amount: p.amount, idx: p.idx }); });
+      ch.on('presence', { event: 'sync' }, () => { this._syncViewers(ch.presenceState()); });
+      await new Promise((res, rej) => { ch.subscribe(async (status) => { if (status === 'SUBSCRIBED') { await ch.track({ handle, name: displayName(), at: Date.now() }); res(); } else if (status === 'CHANNEL_ERROR' || status === 'TIMED_OUT') rej(new Error(status)); }); });
       this._ch = ch;
     },
   };
+  async function pushScore() { await net.upsertScore(displayName(), credits); }
+
+  /* ==========================================================================
+     CLOUD / SOCIAL LAYER — live crowd betting "floor", viewers roster, global leaderboard
+     ======================================================================== */
+  // THE FLOOR — a live aggregate of everyone's wagers on the upcoming match (resets each match).
+  let floor = { idx: -1, aTok: 0, bTok: 0, aCnt: 0, bCnt: 0, bettors: {} };
+  function floorReset(idx) { floor = { idx, aTok: 0, bTok: 0, aCnt: 0, bCnt: 0, bettors: {} }; }
+  function floorAdd(id, side, amt) {
+    amt = Math.max(0, Math.round(+amt || 0));
+    if (!id || floor.bettors[id]) return;             // one wager per player per match
+    floor.bettors[id] = side;
+    if (side === 'AXIOM') { floor.aTok += amt; floor.aCnt++; } else { floor.bTok += amt; floor.bCnt++; }
+  }
+  function updateFloor() {
+    if (!el.floor) return;
+    if (floor.idx !== curIdx) floorReset(curIdx);
+    const show = net.mode === 'backend' && phaseAt(vnow()).phase === 'BET';
+    el.floor.classList.toggle('on', show);
+    if (!show) return;
+    const total = floor.aTok + floor.bTok, n = floor.aCnt + floor.bCnt;
+    const pa = total > 0 ? Math.round(100 * floor.aTok / total) : 50, pb = 100 - pa;
+    if (el.floorFa) el.floorFa.style.width = pa + '%';
+    if (el.floorFb) el.floorFb.style.width = pb + '%';
+    if (el.floorPa) el.floorPa.textContent = total > 0 ? pa + '%' : '—';
+    if (el.floorPb) el.floorPb.textContent = total > 0 ? pb + '%' : '—';
+    if (el.floorMeta) el.floorMeta.textContent = n > 0
+      ? (n + (n === 1 ? ' bet' : ' bets') + ' · ' + fmt(total) + ' tk on the line')
+      : 'no bets yet — be the first';
+  }
+
+  // GLOBAL LEADERBOARD (Route A) — read the view, render with your row highlighted; offline -> personal stats.
+  let leaderboardCache = null;     // null = offline/unknown -> personal stats; array = global rows
+  let _lbLast = 0;
+  async function refreshLeaderboard() {
+    leaderboardCache = await net.fetchLeaderboard();   // array online, null offline/failed
+    renderBoard();
+  }
+  function renderBoard() {
+    if (!el.board) return;
+    const add = (cls, html) => { const d = document.createElement('div'); d.className = cls; d.innerHTML = html; el.board.appendChild(d); };
+    if (net.mode === 'backend' && Array.isArray(leaderboardCache)) {
+      const rows = leaderboardCache;
+      let mine = -1;
+      rows.forEach((r, i) => { if (r && r.player === handle) mine = i; });
+      el.board.innerHTML = '';
+      rows.forEach((r, i) => {
+        add('lb-row' + (r && r.player === handle ? ' you' : ''),
+          '<span class="lb-rank">' + (i + 1) + '</span>' +
+          '<span class="lb-name">' + escapeHtml((r && (r.name || r.player)) || '\u2014') + '</span>' +
+          '<span class="lb-cred">' + fmt(Math.round((r && r.credits) || 0)) + '</span>');
+      });
+      if (!rows.length) {
+        add('lb-row you', '<span class="lb-rank">1</span><span class="lb-name">' + escapeHtml(displayName()) + ' (you)</span><span class="lb-cred">' + fmt(Math.round(credits)) + '</span>');
+      } else if (mine < 0) {                              // not in the visible top -> always show your own line
+        add('lb-sep', '');
+        add('lb-row you', '<span class="lb-rank">\u00b7</span><span class="lb-name">' + escapeHtml(displayName()) + ' (you)</span><span class="lb-cred">' + fmt(Math.round(credits)) + '</span>');
+      }
+      return;
+    }
+    // offline / solo -> personal stat rows
+    const rows = boardCache.length ? boardCache : [{ k: 'Balance', v: fmt(Math.round(credits)) + ' tk' }];
+    el.board.innerHTML = '';
+    rows.forEach((e) => add('stat-row', '<span class="st-k">' + escapeHtml(e.k || '') + '</span><span class="st-v">' + escapeHtml(e.v || '') + '</span>'));
+  }
+
+  // VIEWERS roster + live count
+  function updateViewers() {
+    if (net.mode !== 'backend') {
+      if (el.chatCount) el.chatCount.textContent = '•';
+      if (el.viewers) el.viewers.textContent = '';
+      return;
+    }
+    const vs = net.viewers();
+    if (el.chatCount) el.chatCount.textContent = '\uD83D\uDC65 ' + vs.length;
+    if (el.viewers) {
+      const names = vs.map((v) => (v.id === handle ? displayName() : v.name)).filter(Boolean);
+      const shown = names.slice(0, 6);
+      let txt = 'In the arena: ' + shown.join(' \u00b7 ');
+      if (names.length > shown.length) txt += ' +' + (names.length - shown.length);
+      el.viewers.textContent = names.length ? txt : '';
+    }
+  }
 
   /* ==========================================================================
      LIVE FEED + CHAT  (house bet/win announcements + real player chat)
@@ -3493,11 +3707,12 @@ if (typeof module !== 'undefined' && module.exports) {
   }
   function updateStatHud() {
     if (!el.statHud) return;
-    const show = analyticsOn && matchRef && !replay.playing;
+    // live combat telemetry -> show during the FIGHT only (keeps the betting screen uncluttered)
+    const show = analyticsOn && matchRef && phaseAt(vnow()).phase === 'FIGHT' && !replay.playing;
     el.statHud.classList.toggle('on', !!show);
     if (!show) return;
     const a = matchRef.a, b = matchRef.b, t = Math.max(0.5, matchRef.t);
-    if (dmgDealt._idx !== matchRef.idx) dmgDealt = { a: 0, b: 0, critA: 0, critB: 0, _idx: matchRef.idx };
+    if (dmgDealt._idx !== curIdx) dmgDealt = { a: 0, b: 0, critA: 0, critB: 0, _idx: curIdx };
     const set = (elm, v) => { if (elm) elm.textContent = v; };
     const pct = (ag) => (ag.shotsFired ? Math.round((ag.shotsHit / ag.shotsFired) * 100) : 0) + '%';
     const shd = (ag) => ag.shieldMax > 0 ? Math.round((ag.shield / ag.shieldMax) * 100) + '%' : '\u2014';
@@ -3511,51 +3726,30 @@ if (typeof module !== 'undefined' && module.exports) {
     set(el.shRange, Math.hypot(a.x - b.x, a.z - b.z).toFixed(1) + ' u');
   }
 
-  /* PREDICTIONS — a live win-probability read from the match state, + a running model-accuracy tally */
+  /* PREDICTIONS — a pre-match FORECAST for the UPCOMING fight, shown while bets are open, plus a model-accuracy
+     tally. The forecast is the matchup prior (per mode), NOT the simulated result, so it informs your bet
+     without spoiling the deterministic outcome. */
   let predState = { idx: -1, settled: false };
   let predRecord = { hit: 0, total: 0 };
-  function liveWinProb(m) {
-    if (!m) return 0.5;
-    const a = m.a, b = m.b;
-    const prior = baseProbA(m.idx);
-    const ea = a.hp + (a.shield || 0), eb = b.hp + (b.shield || 0);
-    const hpShare = (ea + eb > 0) ? ea / (ea + eb) : 0.5;
-    let p;
-    if (m.obj === 'control') {
-      const capShare = (m.capA + 2) / (m.capA + m.capB + 4);
-      p = prior * 0.25 + hpShare * 0.40 + capShare * 0.35;
-    } else if (m.scoreTarget) {
-      const kA = m.teamKills(0), kB = m.teamKills(1);
-      const scoreShare = (kA + 0.6) / (kA + kB + 1.2);
-      p = prior * 0.25 + hpShare * 0.40 + scoreShare * 0.35;
-    } else {
-      const devel = clampN(((a.maxHp - a.hp) + (b.maxHp - b.hp)) / (0.45 * (a.maxHp + b.maxHp)), 0, 1);
-      p = prior * (1 - devel) + hpShare * devel;            // start at the prior, converge to live HP share
-      if (!a.alive && b.alive) p = 0.02; else if (!b.alive && a.alive) p = 0.98;
-    }
-    return clampN(p, 0.02, 0.98);
-  }
   async function persistPred() { try { await jset('predRecord', predRecord, false); } catch (e) {} }
   function updatePredBar() {
     if (!el.predBar) return;
-    const show = predictOn && matchRef && !replay.playing;
+    const show = predictOn && matchRef && phaseAt(vnow()).phase === 'BET';
     el.predBar.classList.toggle('on', !!show);
-    const idx = matchRef ? matchRef.idx : -1;
-    if (predState.idx !== idx) predState = { idx, settled: false };
-    if (!matchRef) return;
-    const p = liveWinProb(matchRef), pa = Math.round(p * 100), pb = 100 - pa;
+    if (predState.idx !== curIdx) predState = { idx: curIdx, settled: false };
     if (show) {
+      const p = baseProbA(curIdx), pa = Math.round(p * 100), pb = 100 - pa;
       if (el.predFillA) el.predFillA.style.width = pa + '%';
       if (el.predFillB) el.predFillB.style.width = pb + '%';
       if (el.predPctA) el.predPctA.textContent = pa + '%';
       if (el.predPctB) el.predPctB.textContent = pb + '%';
-      if (el.predTag) el.predTag.textContent = pa > 56 ? 'AXIOM FAVORED' : pb > 56 ? 'NEMESIS FAVORED' : 'TOO CLOSE';
-      if (el.predAcc) el.predAcc.textContent = predRecord.total ? 'model ' + Math.round(100 * predRecord.hit / predRecord.total) + '% \u00b7 ' + predRecord.total : '';
+      if (el.predTag) el.predTag.textContent = pa > 56 ? 'AXIOM FAVORED' : pb > 56 ? 'NEMESIS FAVORED' : 'TOSS-UP';
+      if (el.predAcc) el.predAcc.textContent = predRecord.total ? 'model right ' + Math.round(100 * predRecord.hit / predRecord.total) + '% (' + predRecord.total + ')' : 'forecast';
     }
-    // score the model once, when the match resolves: did the side it favored win?
-    if (matchRef.over && !predState.settled && matchRef.winner && matchRef.winner !== 'DRAW') {
+    // score the forecast once per match vs the real winner (honest "how often the favorite wins" stat)
+    if (matchRef && matchRef.over && !predState.settled && matchRef.winner && matchRef.winner !== 'DRAW') {
       predState.settled = true;
-      const pick = p >= 0.5 ? 'AXIOM' : 'NEMESIS';
+      const pick = baseProbA(curIdx) >= 0.5 ? 'AXIOM' : 'NEMESIS';
       predRecord.total++; if (pick === matchRef.winner) predRecord.hit++;
       persistPred();
     }
@@ -3570,16 +3764,26 @@ if (typeof module !== 'undefined' && module.exports) {
     el.nextIn.classList.toggle('on', show);
     if (show) el.nextIn.innerHTML = 'NEXT MATCH IN <b>' + Math.max(1, Math.ceil((CYCLE_MS - (vnow() % CYCLE_MS)) / 1000)) + 's</b>';
   }
-  function chatTick(dt) { commentaryTick(); decayHype(dt); updateStatHud(); updatePredBar(); updateCountdown(); if (_uavCd > 0) _uavCd = Math.max(0, _uavCd - dt); }
+  function chatTick(dt) {
+    commentaryTick(); decayHype(dt); updateStatHud(); updatePredBar(); updateCountdown();
+    updateFloor(); updateViewers();
+    if (net.mode === 'backend' && Date.now() - _lbLast > 12000) { _lbLast = Date.now(); refreshLeaderboard(); }
+    if (_uavCd > 0) _uavCd = Math.max(0, _uavCd - dt);
+  }
 
   function connectChat() {
-    net.onMessage((m) => ticker(m.handle, m.text, null, m.you));
-    net.onEmote((m) => spawnEmote(m.emoji, m.handle));
-    net.onBuy((m) => { addFeed('\u2728 ' + (m.handle || 'A watcher') + ' unlocked ' + m.item, '#8B7FFF'); ticker(m.handle, 'unlocked ' + m.item, '#8B7FFF', false); });
-    net.connect().then(() => {
+    net.onMessage((m) => ticker(m.name || m.handle, m.text, null, m.you));
+    net.onEmote((m) => spawnEmote(m.emoji, m.name || m.handle));
+    net.onBuy((m) => { addFeed('\u2728 ' + (m.name || m.handle || 'A watcher') + ' unlocked ' + m.item, '#8B7FFF'); ticker(m.name || m.handle, 'unlocked ' + m.item, '#8B7FFF', false); });
+    net.onBet((m) => {                       // someone in the room placed a wager
+      if (m.idx != null && m.idx === curIdx) { if (floor.idx !== curIdx) floorReset(curIdx); floorAdd(m.handle, m.side, m.amount); }
+      addFeed((m.name || 'A watcher') + ' staked ' + fmt(m.amount) + ' on ' + m.side, m.side === 'AXIOM' ? COL.A : COL.B);
+    });
+    net.connect().then(async () => {
       tickerSys(net.mode === 'backend'
         ? (net.online() + ' watching live · say hi')
         : 'Solo session · chat is local here. Add a backend (see the setup file) for live global chat.');
+      if (net.mode === 'backend') { await pushScore(); _lbLast = Date.now(); await refreshLeaderboard(); updateViewers(); }
     });
   }
   async function sendUserChat() {
@@ -3682,11 +3886,10 @@ if (typeof module !== 'undefined' && module.exports) {
 
 
   /* ==========================================================================
-     WATCHER PERKS  — token-spend that enhances the WATCHING experience only.
-     Every perk pays the house treasury (so the closed-economy supply is conserved
-     and recycles via dividends) and NONE touch the deterministic match sim, so a
-     purchase can never change who wins. "+15s" just keeps the betting window open
-     longer (the fight is unchanged); the others are pure presentation toggles.
+     ONE-TIME UPGRADES  — token-spend that enhances the WATCHING experience only.
+     Every upgrade pays the house treasury (so the token supply is conserved) and
+     NONE touch the deterministic match sim, so a purchase can never change who wins.
+     Analytics / Predictions / Insurance / Replay+ are all pure presentation toggles.
      ======================================================================== */
   let analyticsOn = false;            // Combat Analytics: floating damage numbers + live stat readout
   let predictOn = false;              // Predictive Model: live win-probability read
@@ -3695,8 +3898,9 @@ if (typeof module !== 'undefined' && module.exports) {
     hypeFX = false;                   // (Hype FX retired — replaced by Insurance + Analytics)
     analyticsOn = perkActive('analytics');
     predictOn = perkActive('predict');
-    if (el.statHud) el.statHud.classList.toggle('on', analyticsOn && !!matchRef);
-    if (el.predBar) el.predBar.classList.toggle('on', predictOn && !!matchRef);
+    // visibility is decided per-frame by updateStatHud (FIGHT) / updatePredBar (BET); here we only hide when toggled off
+    if (el.statHud && !analyticsOn) el.statHud.classList.remove('on');
+    if (el.predBar && !predictOn) el.predBar.classList.remove('on');
     if (perkActive('dirReplay')) { REPLAY_WINDOW = 4.2; REPLAY_SLOW = 0.30; DEATH_HOLD = 1.5; }
     else { REPLAY_WINDOW = 2.9; REPLAY_SLOW = 0.42; DEATH_HOLD = 1.0; }
   }
@@ -3923,6 +4127,9 @@ if (typeof module !== 'undefined' && module.exports) {
     activeBet = { matchIndex: curIdx, side, stake, odds, settled: false };
     addFeed('YOU bet ' + fmt(stake) + ' on ' + side + ' @ \u00d7' + odds.toFixed(2), side === 'AXIOM' ? COL.A : COL.B);
     ticker(handle, 'bet ' + fmt(stake) + ' on ' + side, side === 'AXIOM' ? COL.A : COL.B, true);
+    if (floor.idx !== curIdx) floorReset(curIdx);
+    floorAdd(handle, side, stake);                          // count my own wager in the live crowd floor
+    net.sendBet(side, stake, curIdx);                       // and tell the room
     await persistPlayer();
     refreshHUD();
     updateBetButtons();
@@ -3973,6 +4180,8 @@ if (typeof module !== 'undefined' && module.exports) {
     await persistPlayer();
     await refreshBoard();
     refreshHUD();
+    await pushScore();              // write my new balance to the global board
+    await refreshLeaderboard();     // and pull everyone's latest standings
   }
 
   function addFeed(text, hex) {
@@ -4017,7 +4226,7 @@ if (typeof module !== 'undefined' && module.exports) {
 
   function refreshHUD() {
     if (el.balance) el.balance.textContent = fmt(credits);
-    if (el.handle) el.handle.textContent = handle || '—';
+    if (el.nameInput && document.activeElement !== el.nameInput && el.nameInput.value !== displayName()) el.nameInput.value = displayName();
     if (el.stakeVal) el.stakeVal.textContent = fmt(stake);
 
     // active bet + payout
@@ -4032,18 +4241,8 @@ if (typeof module !== 'undefined' && module.exports) {
       if (el.payout) el.payout.textContent = '—';
     }
 
-    // standings panel = your personal stats (key/value rows)
-    if (el.board) {
-      el.board.innerHTML = '';
-      const rows = boardCache.length ? boardCache : [{ k: 'Balance', v: fmt(Math.round(credits)) + ' tk' }];
-      rows.forEach((e) => {
-        const row = document.createElement('div');
-        row.className = 'stat-row';
-        row.innerHTML = '<span class="st-k">' + escapeHtml(e.k || '') + '</span>' +
-          '<span class="st-v">' + escapeHtml(e.v || '') + '</span>';
-        el.board.appendChild(row);
-      });
-    }
+    // standings panel = global leaderboard online, personal stats offline
+    renderBoard();
   }
   function escapeHtml(s) { return String(s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c])); }
 
@@ -4236,6 +4435,13 @@ if (typeof module !== 'undefined' && module.exports) {
     // real chat input (local echo solo; live across players when a backend is configured)
     if (el.chatSend) el.chatSend.addEventListener('click', sendUserChat);
     if (el.chatText) el.chatText.addEventListener('keydown', (e) => { if (e.key === 'Enter') { e.preventDefault(); sendUserChat(); } });
+    if (el.nameInput) {
+      el.nameInput.value = displayName();
+      const commit = () => { setPlayerName(el.nameInput.value); };
+      el.nameInput.addEventListener('change', commit);
+      el.nameInput.addEventListener('blur', commit);
+      el.nameInput.addEventListener('keydown', (e) => { if (e.key === 'Enter') { e.preventDefault(); el.nameInput.blur(); } });
+    }
     // keyboard shortcuts: 1-5 cycle cameras
     window.addEventListener('keydown', (e) => {
       if (e.target && /input|textarea/i.test(e.target.tagName)) return;
